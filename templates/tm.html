@@ -1,0 +1,87 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='mec_tm.gif') }}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+        <title>Tm</title>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-inverse">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href=".">Tm</a>
+            </div>
+          </div>
+        </nav>
+
+        <div class="container">
+
+            {% for comment in comments %}
+                <pre>{{comment}}</pre>
+            {% endfor %}
+
+            <div class="row">
+           <form action="{{ url_for('tm') }}" method="POST">
+            {{form.hidden_tag()}}
+            <table class="table-bordered">
+            <tbody>
+              <tr>
+                <td>{{form.table.label()}}</td>
+                <td colspan=4>{{form.table()}}</td>
+              </tr>
+                <td>{{form.salt.label()}}</td>
+                <td colspan=4>{{form.salt()}}</td>
+              </tr>
+              <tr>
+                <td>{{form.Na.label()}}</td>
+                <td>{{form.Na()}}</td>
+                <td>{{form.Tris.label()}}</td>
+                <td>{{form.Tris()}}</td>
+              </tr>
+              <tr>
+                <td>{{form.K.label()}}</td>
+                <td>{{form.K()}}</td>
+              </tr>
+              <tr>
+                <td>{{form.Mg.label()}}</td>
+                <td>{{form.Mg()}}</td>
+              </tr>
+              <tr>
+                <td>{{form.dnac1.label()}}</td>
+                <td>{{form.dnac1()}}</td>
+                <td>{{form.dNTPs.label()}}</td>
+                <td>{{form.dNTPs()}}</td>
+              </tr>
+              <tr>
+                <td>{{form.dnac2.label()}}</td>
+                <td>{{form.dnac2()}}</td>
+              </tr>
+              <tr>
+                <td colspan=4>
+                    {{form.primer_text(cols="100", rows="20")|safe}}
+                </tr>
+              <tr>
+                <td colspan=4>
+                    <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
+                    {{form.clear(class="btn btn-danger")}}
+                    {{form.send(class="btn btn-success")}}
+
+                </td>
+              </tr>
+            </tbody>
+            </table>
+           </form>
+        </div>
+
+    </body>
+</html>
