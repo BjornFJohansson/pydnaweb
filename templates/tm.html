@@ -75,7 +75,7 @@
                     <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
                     {{form.clear(class="btn btn-danger")}}
                     {{form.send(class="btn btn-success")}}
-                    {{ form.csrf_token }}
+                    {{ form.WTF_CSRF_SECRET_KEY }}
                 </td>
               </tr>
             </tbody>

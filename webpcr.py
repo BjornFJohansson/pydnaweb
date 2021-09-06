@@ -83,7 +83,9 @@ app.config.update(dict(
     SECRET_KEY="powerful_secretkey",
     WTF_CSRF_SECRET_KEY="a_csrf_secret_key"))
 
-app.config["DEBUG"] = True
+print(app.config)
+
+#app.config["DEBUG"] = True
 
 results = []
 
