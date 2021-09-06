@@ -7,6 +7,8 @@ It is built on top of [pydna](https://github.com/BjornFJohansson/pydna).
 
 It is available [here](http://bjornfjohansson.pythonanywhere.com/#).
 
+https://bit.ly/pydnawebpcr
+
 Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
 
 	mkvirtualenv --python=/usr/bin/python3.9 my-virtualenv
