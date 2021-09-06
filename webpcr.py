@@ -4,13 +4,11 @@
 
 # https://blog.pythonanywhere.com/121
 # export FLASK_APP=webpcr.py&&export FLASK_ENV=development&&flask run
-
 # https://pypi.org/project/Bootstrap-Flask
 
 from textwrap import dedent
 from flask import Flask, redirect, render_template, request, url_for
 
-from flask_wtf import FlaskForm
 from wtforms.fields import SelectField
 from wtforms.fields import DecimalField
 from wtforms.fields import TextAreaField
@@ -21,6 +19,8 @@ from pydna.parsers import parse
 from pydna.amplify import Anneal
 
 from Bio.SeqUtils import MeltingTemp as _mt
+
+from flask_wtf import FlaskForm
 
 nn_tableoptions = [(1, "DNA_NN1 - Breslauer et al. (1986), Proc Natl Acad Sci USA 83: 3746-3750"),
                    (2, "DNA_NN2 - Sugimoto et al. (1996), Nuc Acids Res 24 : 4501-4505"),
