@@ -6,6 +6,8 @@
 # export FLASK_APP=webpcr.py&&export FLASK_ENV=development&&flask run
 # https://pypi.org/project/Bootstrap-Flask
 
+import datetime
+
 from textwrap import dedent
 from flask import Flask
 from flask import redirect
@@ -195,7 +197,7 @@ def pcr():
     if number_of_products == 0:
         result_text = ann.report().strip()
     elif 1 <= number_of_products <= cutoff_detailed_figure:
-        result_text = (f'pydna {pydna.__version__}\n'
+        result_text = (f'pydna {pydna.__version__} UTC {{}}\n'
                        f'{ann}\n'
                        f'Number of products formed: {number_of_products}\n'
                        f'{separator}')
@@ -217,7 +219,8 @@ def pcr():
             {{}}
             Pfu-Sso7d DNA polymerase
             {{}}''')
-            result_text = result_text.format(amplicon.figure(),
+            result_text = result_text.format(datetime. datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                             amplicon.figure(),
                                              amplicon.program(),
                                              amplicon.dbd_program())
 
