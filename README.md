@@ -1,13 +1,13 @@
 # webpcr
 
-This is a flask app that contains a PCR simulator and a Tm calculator.
+is a flask app that contains a PCR simulator and a Tm calculator.
 It is built on top of [pydna](https://github.com/BjornFJohansson/pydna).
 
-[![webpcr](webpcr.png)](http://bjornfjohansson.pythonanywhere.com/#)
+[![webpcr](static/webpcr.png)](http://bjornfjohansson.pythonanywhere.com/#)
 
-It is available [here](http://bjornfjohansson.pythonanywhere.com/#).
+It is available online [here](http://bjornfjohansson.pythonanywhere.com/#).
 
-https://bit.ly/pydnawebpcr
+or here: https://bit.ly/pydnawebpcr
 
 Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
 
@@ -17,6 +17,7 @@ Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
 	git clone https://github.com/BjornFJohansson/webpcr.git
 
 
-![settings](settings.png)
+![settings](static/settings.png)
 
-![wsgi](bjornfjohansson_pythonanywhere_com_wsgi_py.png)
+
+![wsgi](static/bjornfjohansson_pythonanywhere_com_wsgi_py.png)

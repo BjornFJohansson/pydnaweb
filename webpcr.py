@@ -213,9 +213,13 @@ def pcr():
             >{amplicon.name}
             {amplicon.seq}
             ----
+            Taq DNA polymerase
+            {{}}
+            Pfu-Sso7d DNA polymerase
             {{}}''')
             result_text = result_text.format(amplicon.figure(),
-                                             amplicon.program())
+                                             amplicon.program(),
+                                             amplicon.dbd_program())
 
     results.append(result_text)
 

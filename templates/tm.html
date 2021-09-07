@@ -45,27 +45,28 @@
               </tr>
               <tr>
                 <td>{{form.Na.label()}}</td>
-                <td>{{form.Na()}}</td>
+                <td>{{form.Na()}} mM</td>
                 <td>{{form.Tris.label()}}</td>
-                <td>{{form.Tris()}}</td>
-              </tr>
-              <tr>
-                <td>{{form.K.label()}}</td>
-                <td>{{form.K()}}</td>
+                <td>{{form.Tris()}} mM</td>
               </tr>
               <tr>
                 <td>{{form.Mg.label()}}</td>
-                <td>{{form.Mg()}}</td>
+                <td>{{form.Mg()}} mM</td>
+                <td>{{form.K.label()}}</td>
+                <td>{{form.K()}} mM</td>
               </tr>
               <tr>
                 <td>{{form.dnac1.label()}}</td>
-                <td>{{form.dnac1()}}</td>
+                <td>{{form.dnac1()}} µM</td>
                 <td>{{form.dNTPs.label()}}</td>
-                <td>{{form.dNTPs()}}</td>
+                <td>{{form.dNTPs()}} mM</td>
               </tr>
               <tr>
                 <td>{{form.dnac2.label()}}</td>
-                <td>{{form.dnac2()}}</td>
+                <td>{{form.dnac2()}} µM</td>
+                <td colspan=4>
+                <a href="{{ url_for('static', filename='info.html') }}" class="btn btn-primary btn-block">info</a>
+                </td>
               </tr>
               <tr>
                 <td colspan=4>
