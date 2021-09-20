@@ -192,16 +192,20 @@ def pcr():
                  template,
                  limit=homology_limit)
 
-    number_of_products = len(ann.forward_primers) * len(ann.reverse_primers)
+    products = ann.products
+    number_of_products = len(products)
+    now = datetime. datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    result_text = (f'pydna {pydna.__version__} UTC {now} '
+                   f'Number of products formed: {number_of_products}\n')
 
     if number_of_products == 0:
-        result_text = ann.report().strip()
+        result_text += ann.report().strip()
+
     elif 1 <= number_of_products <= cutoff_detailed_figure:
-        result_text = (f'pydna {pydna.__version__} UTC {{}}\n'
-                       f'{ann}\n'
-                       f'Number of products formed: {number_of_products}\n'
-                       f'{separator}')
-        for amplicon in ann.products:
+        result_text += (f'{ann.report()}\n'
+                        f'{separator}')
+        for amplicon in products:
             result_text += dedent(f'''
             >{amplicon.forward_primer.name}
             {amplicon.forward_primer.seq}
@@ -219,8 +223,7 @@ def pcr():
             {{}}
             Pfu-Sso7d DNA polymerase
             {{}}''')
-            result_text = result_text.format(datetime. datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                             amplicon.figure(),
+            result_text = result_text.format(amplicon.figure(),
                                              amplicon.program(),
                                              amplicon.dbd_program())
 
