@@ -9,6 +9,8 @@ It is available online [here](http://bjornfjohansson.pythonanywhere.com/#).
 
 or here: https://bit.ly/pydnawebpcr
 
+[a blogpost](https://ochsavidare.blogspot.com/2013/12/webpcr-pcr-product-simulation.html)
+
 Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
 
 	mkvirtualenv --python=/usr/bin/python3.9 my-virtualenv

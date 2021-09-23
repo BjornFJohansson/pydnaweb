@@ -11,13 +11,6 @@
 
 # pyinstaller -w -F --add-data "templates:templates" --add-data "static:static" webpcr_app.py
 
-
-try:
-    from webui import WebUI
-    wb = True
-except ImportError:
-    wb = False
-
 import datetime
 
 from textwrap import dedent
@@ -97,9 +90,6 @@ nn_tables = {"1": _mt.DNA_NN1,
              "4": _mt.DNA_NN4}
 
 app = Flask(__name__)
-
-if wb:
-    ui = WebUI(app, debug=True)
 
 app.config.update(dict(
     SECRET_KEY="powerful_secretkey",
@@ -245,7 +235,3 @@ def pcr():
     results.append(result_text)
 
     return redirect(url_for('pcr'))
-
-
-if __name__ == '__main__':
-    ui.run()
