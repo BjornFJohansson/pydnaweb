@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
         <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-        <title>PydnaTools</title>
+        <title>WebPCR</title>
     </head>
 
     <body>
@@ -20,7 +20,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand">PydnaTools
+              <a class="navbar-brand">WebPCR
               powered by <a class="navbar-brand" href="https://github.com/BjornFJohansson/pydna">pydna {{version}}</a>
 
 
@@ -28,15 +28,15 @@
           </div>
         </nav>
               <div>
-			  text1
+			  <span style="font-size:20px">Use the PCR simulator if you already have a pair of primer sequences and a template sequence.</span>
               </div>
               <a href="{{url_for('pcr')}}" class="btn btn-primary btn-lg btn-block">PCR simulator</a>
               <div>
-			  text2
+			  <span style="font-size:20px">Use the primer Tm calculator to calculate Tm of single or multiple primers.</span>
               </div>
               <a href="{{url_for('tm')}}" class="btn btn-primary btn-lg btn-block">Primer Tm calculator</a>
               <div>
-			  text3
+			  <span style="font-size:20px">Use the PRimer designer for n primer for a sequence.</span>
               </div>
               <a href="{{url_for('primerdesign')}}" class="btn btn-primary btn-lg btn-block">Primer designer</a>
 
