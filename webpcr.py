@@ -2,25 +2,10 @@
 # -*- coding: utf-8 -*-
 """docstring."""
 
-# https://blog.pythonanywhere.com/121
-# export FLASK_APP=webpcr.py&&export FLASK_ENV=development&&flask run
-# https://pypi.org/project/Bootstrap-Flask
-
-# https://elc.github.io/posts/executable-flask-pyinstaller
-# https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html
-
-# pyinstaller -w -F --add-data "templates:templates" --add-data "static:static" webpcr_app.py
-
-
-try:
-    from webui import WebUI
-    wb = True
-except ImportError:
-    wb = False
-
 import datetime
 
 from textwrap import dedent
+
 from flask import Flask
 from flask import redirect
 from flask import render_template
@@ -32,11 +17,29 @@ from wtforms.fields import DecimalField
 from wtforms.fields import TextAreaField
 from wtforms.fields import SubmitField
 
-import pydna
+from Bio.SeqUtils import MeltingTemp as _mt
+
+from pydna import __version__ as version
 from pydna.parsers import parse
 from pydna.amplify import Anneal
+from pydna.design import primer_design
 
-from Bio.SeqUtils import MeltingTemp as _mt
+
+# https://blog.pythonanywhere.com/121
+# export FLASK_APP=webpcr.py&&export FLASK_ENV=development&&flask run
+# https://pypi.org/project/Bootstrap-Flask
+
+# https://elc.github.io/posts/executable-flask-pyinstaller
+# https://stackoverflow.com/questions/32149892/flask-application-built-using-pyinstaller-not-rendering-index-html
+
+# pyinstaller -w -F --add-data "templates:templates"
+# --add-data "static:static" webpcr_app.py
+
+
+
+
+
+
 from pydna.tm import tm_default
 
 from flask_wtf import FlaskForm
@@ -98,14 +101,13 @@ nn_tables = {"1": _mt.DNA_NN1,
 
 app = Flask(__name__)
 
-if wb:
-    ui = WebUI(app, debug=True)
-
 app.config.update(dict(
     SECRET_KEY="powerful_secretkey",
     WTF_CSRF_SECRET_KEY="a_csrf_secret_key"))
 
 results = []
+comments = []
+design_results = []
 
 separator = '-'*80
 
@@ -113,7 +115,8 @@ separator = '-'*80
 @app.route("/", methods=["GET", "POST"])
 def index():
     """docstring."""
-    return render_template("index.html")
+    return render_template("index.html",
+                           version=version)
 
 
 @app.route("/tm", methods=["GET", "POST"])
@@ -122,16 +125,17 @@ def tm():
     form = CustomForm()
     if request.method == "GET":
         return render_template("tm.html",
-                               form=form)
+                               form=form,
+                               comments=comments)
 
     if 'clear' in request.form:
+        comments.clear()
         return redirect(url_for('tm'))
 
     user_data = request.form
 
     primers = parse(user_data['primer_text'])
 
-    comments = []
     for primer in primers:
         tm = tm_default(primer.seq,
                         check=True,
@@ -153,31 +157,12 @@ def tm():
                         saltcorr=int(user_data['salt']))
         primer.description = f"tm={round(tm, 3)}"
         comments.append(primer.format("fasta"))
+    return redirect(url_for('tm'))
     return render_template("tm.html",
                            form=form,
                            comments=comments)
 
-# def tm_default(
-#     seq,
-#     check=True,
-#     strict=True,
-#     c_seq=None,
-#     shift=0,
-#     nn_table=_mt.DNA_NN4,  # DNA_NN4: values from SantaLucia & Hicks (2004)
-#     tmm_table=None,
-#     imm_table=None,
-#     de_table=None,
-#     dnac1=500 / 2,  # I assume 500 µM of each primer in the PCR mix
-#     dnac2=500 / 2,  # This is what MELTING and Primer3Plus do
-#     selfcomp=False,
-#     Na=40,
-#     K=0,
-#     Tris=75.0,  # We use the 10X Taq Buffer with (NH4)2SO4 (above)
-#     Mg=1.5,  # 1.5 mM Mg2+ is often seen in modern protocols
-#     dNTPs=0.8,  # I assume 200 µM of each dNTP
-#     saltcorr=7,  # Tm = 81.5 + 0.41(%GC) - 600/N + 16.6 x log[Na+]
-#     func=_mt.Tm_NN,  # Used by Primer3Plus to calculate the product Tm.
-# ):
+
 
 
 @app.route("/pcr", methods=["GET", "POST"])
@@ -186,7 +171,7 @@ def pcr():
     if request.method == "GET":
         return render_template("pcr.html",
                                results=results,
-                               version=pydna.__version__)
+                               version=version)
 
     if 'clear' in request.form:
         results.clear()
@@ -197,6 +182,7 @@ def pcr():
     sequences = parse(user_data)
 
     template = sequences.pop()
+
     primer_sequences = sequences
 
     homology_limit = 12
@@ -211,7 +197,7 @@ def pcr():
     number_of_products = len(products)
     now = datetime. datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    result_text = (f'pydna {pydna.__version__} UTC {now} '
+    result_text = (f'pydna {version} UTC {now} '
                    f'Number of products formed: {number_of_products}\n')
 
     if number_of_products == 0:
@@ -222,9 +208,9 @@ def pcr():
                         f'{separator}')
         for amplicon in products:
             result_text += dedent(f'''
-            >{amplicon.forward_primer.name}
+            >{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
             {amplicon.forward_primer.seq}
-            >{amplicon.reverse_primer.name}
+            >{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
             {amplicon.reverse_primer.seq}
             >{ann.template.name}
             {ann.template.seq}
@@ -247,5 +233,102 @@ def pcr():
     return redirect(url_for('pcr'))
 
 
+@app.route("/primerdesign", methods=["GET", "POST"])
+def primerdesign():
+    if request.method == "GET":
+        return render_template("primerdesign.html",
+                               results=design_results,
+                               version=version)
+    if 'clear' in request.form:
+        design_results.clear()
+        return redirect(url_for('primerdesign'))
+
+    user_data = request.form["contents"]
+
+    sequences = parse(user_data)
+
+    template = sequences.pop()
+
+    primer_sequences = sequences
+
+    homology_limit = 12
+
+    amplicon = None
+
+    if primer_sequences:
+        p = primer_sequences.pop()
+        try:
+            amplicon = primer_design(template,
+                                     fp=p,
+                                     limit=homology_limit)
+        except IndexError:  # ValueError
+            pass
+        try:
+            amplicon = primer_design(template,
+                                     rp=p,
+                                     limit=homology_limit)
+        except IndexError:  # ValueError
+            result_text = "Primer does not anneal."
+
+    else:
+        amplicon = primer_design(template,
+                                 limit=homology_limit)
+
+    if amplicon:
+
+        now = datetime. datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        result_text = dedent(f'''
+        pydna {version} UTC {now}
+        >{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
+        {amplicon.forward_primer.seq}
+        >{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
+        {amplicon.reverse_primer.seq}
+        >{amplicon.template.name}
+        {amplicon.template.seq}
+        ----
+        {{}}
+        ----
+        >{amplicon.name}
+        {amplicon.seq}
+        ----
+        Taq DNA polymerase
+        {{}}
+        Pfu-Sso7d DNA polymerase
+        {{}}''')
+        result_text = result_text.format(amplicon.figure(),
+                                         amplicon.program(),
+                                         amplicon.dbd_program())
+
+    design_results.append(result_text)
+
+    return redirect(url_for('primerdesign'))
+
+
 if __name__ == '__main__':
+    from webui import WebUI
+    ui = WebUI(app, debug=True)
     ui.run()
+
+
+# def tm_default(
+#     seq,
+#     check=True,
+#     strict=True,
+#     c_seq=None,
+#     shift=0,
+#     nn_table=_mt.DNA_NN4,  # DNA_NN4: values from SantaLucia & Hicks (2004)
+#     tmm_table=None,
+#     imm_table=None,
+#     de_table=None,
+#     dnac1=500 / 2,  # I assume 500 µM of each primer in the PCR mix
+#     dnac2=500 / 2,  # This is what MELTING and Primer3Plus do
+#     selfcomp=False,
+#     Na=40,
+#     K=0,
+#     Tris=75.0,  # We use the 10X Taq Buffer with (NH4)2SO4 (above)
+#     Mg=1.5,  # 1.5 mM Mg2+ is often seen in modern protocols
+#     dNTPs=0.8,  # I assume 200 µM of each dNTP
+#     saltcorr=7,  # Tm = 81.5 + 0.41(%GC) - 600/N + 16.6 x log[Na+]
+#     func=_mt.Tm_NN,  # Used by Primer3Plus to calculate the product Tm.
+# ):
