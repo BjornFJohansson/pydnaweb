@@ -89,7 +89,7 @@ class CustomForm(FlaskForm):
     dNTPs = DecimalField("dNTPs", default=0.8)
 
     primer_text = TextAreaField('primer_text',
-                                default=">MyPrimer\ngctactacacacgtactgactg")
+                                default=">MyPrimer\nATGGCAGTTGAGAAGA")
     send = SubmitField('calculate')
     clear = SubmitField('clear')
 
