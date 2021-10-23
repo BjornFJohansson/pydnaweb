@@ -158,9 +158,9 @@ def tm():
         primer.description = f"tm={round(tm, 3)}"
         comments.append(primer.format("fasta"))
     return redirect(url_for('tm'))
-    return render_template("tm.html",
-                           form=form,
-                           comments=comments)
+    # return render_template("tm.html",
+    #                        form=form,
+    #                        comments=comments)
 
 
 
