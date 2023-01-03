@@ -3,9 +3,9 @@
 is a flask app that contains a PCR simulator and a Tm calculator.
 It is built on top of [pydna](https://github.com/BjornFJohansson/pydna).
 
-[![webpcr](static/webpcr.png)](http://bjornfjohansson.pythonanywhere.com/#)
+[![webpcr](static/webpcr.png)](http://pydna.pythonanywhere.com/#)
 
-It is available online [here](http://bjornfjohansson.pythonanywhere.com/#).
+It is available online [here](http://pydna.pythonanywhere.com/#).
 
 or here: https://bit.ly/pydnawebpcr
 
