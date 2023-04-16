@@ -1,4 +1,6 @@
 <html>
+<img src="{{ url_for('static', filename='pydna.resized.png') }}"/>
+
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,31 +9,43 @@
 
         <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-        <title>WebPCR</title>
+        <title>PydnaWeb</title>
     </head>
 
     <body>
-      <div class="container"> WebPCR powered by <a href="https://github.com/BjornFJohansson/pydna">pydna {{version}}</a>
-      </div>
+
+    <table class="tg">
+    <tbody>
+      <tr>
+       PydnaWeb powered by <a href="https://github.com/BjornFJohansson/pydna">pydna {{version}}</a> and Biopython {{bpversion}}
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('pcr')}}" class="btn btn-primary btn-lg btn-block">WebPCR simulator</a></td>
+        <td class="tg-0pky">Simulate PCR if you already have a pair of primers and a template sequence.</td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('tm')}}" class="btn btn-primary btn-lg btn-block">Primer Tm calculator</a></td>
+        <td class="tg-0pky">Modern melting calculator for single or multiple PCR primers. Based on Biopython.</td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('primerdesign')}}" class="btn btn-primary btn-lg btn-block">Primer designer</a></td>
+        <td class="tg-0pky">Design a new primer pair or to design a primer to match an existing primer for a given template.</td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('asmdesign')}}" class="btn btn-primary btn-lg btn-block">Assembly primer designer</a></td>
+        <td class="tg-0pky">Use the assembly primer designer to design primers for linear or circular assembly of a list of sequence fragments.</td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('assembly')}}" class="btn btn-primary btn-lg btn-block">Assembly simulator</a></td>
+        <td class="tg-0pky">Use the assembly simulator to for linear or circular assembly of a list of sequence fragments.</td>
+      </tr>
+
+    </tbody>
+    </table>
 
       <div>
-	  <span style="font-size:20px">Use the PCR simulator if you already have a pair of primer sequences and a template sequence.</span>
-      </div>
-      <a href="{{url_for('pcr')}}" class="btn btn-primary btn-lg btn-block">PCR simulator</a>
-      <div>
-	  <span style="font-size:20px">Use the primer Tm calculator to calculate Tm of single or multiple primers.</span>
-      </div>
-      <a href="{{url_for('tm')}}" class="btn btn-primary btn-lg btn-block">Primer Tm calculator</a>
-      <div>
-	  <span style="font-size:20px">Use the Primer designer for a new primer pair or to
-                                   design a primer to match an existing primer.</span>
-      </div>
-
-      <div>
-      <a href="{{url_for('primerdesign')}}" class="btn btn-primary btn-lg btn-block">Primer designer</a>
-
       <a href="https://www.pythonanywhere.com" class="btn btn-link">Pythonanywhere</a>
-      <a href="https://github.com/BjornFJohansson/webpcr" class="btn btn-link">WebPCR on GitHub</a>
+      <a href="https://github.com/BjornFJohansson/PydnaWeb" class="btn btn-link">PydnaWeb on GitHub</a>
       <a href="https://github.com/BjornFJohansson/pydna" class="btn btn-link">pydna on GitHub</a>
       </div>
     </body>
