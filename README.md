@@ -1,13 +1,18 @@
-# webpcr
+# pydnaweb
 
-is a flask app that contains a PCR simulator and a Tm calculator.
-It is built on top of [pydna](https://github.com/BjornFJohansson/pydna).
+is a flask app that make selected pydna functionality available as a web service. Specifically:
 
-[![webpcr](static/webpcr.png)](http://bjornfjohansson.pythonanywhere.com/#)
+- The WebPCR simulator.
+- Primer Tm calculator based on The [Bio.SeqUtils.MeltingTemp](https://biopython.org/docs/1.81/api/Bio.SeqUtils.MeltingTemp.html) module.
+- Primer designer. Design two flanking primers, given a template sequence.
+- Assembly primer designer. Design tailed primers for assembly by HR.
+- Assembly simulator. Assemble a series of sequences by shared homology.
 
-It is available online [here](http://bjornfjohansson.pythonanywhere.com/#).
+pydnaweb is built on top of [pydna](https://github.com/BjornFJohansson/pydna).
 
-or here: https://bit.ly/pydnawebpcr
+[![webpcr](static/webpcr.png)](http://pydna.pythonanywhere.com/#)
+
+It is available online [here](http://pydna.pythonanywhere.com/#).
 
 [a blogpost](https://ochsavidare.blogspot.com/2013/12/webpcr-pcr-product-simulation.html)
 
@@ -16,7 +21,6 @@ Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
 	mkvirtualenv --python=/usr/bin/python3.9 my-virtualenv
 	pip install flask flask-wtf wtforms pydna
 	git clone https://github.com/BjornFJohansson/webpcr.git
-
 
 Session on PythonAnywhere
 
