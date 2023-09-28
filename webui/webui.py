@@ -11,11 +11,20 @@ default_url = "127.0.0.1"
 
 
 class WebUI(object):
-    def __init__(self, app, url=default_url, port=5000,
-                 debug=False, using_win32=False, icon_path=None, app_name=None):
+    def __init__(
+        self,
+        app,
+        url=default_url,
+        port=5000,
+        debug=False,
+        using_win32=False,
+        icon_path=None,
+        app_name=None,
+    ):
         self.flask_app = app
-        self.flask_thread = Thread(target=self._run_flask,
-                                   args=(url, port, debug, using_win32))
+        self.flask_thread = Thread(
+            target=self._run_flask, args=(url, port, debug, using_win32)
+        )
         self.flask_thread.daemon = True
         self.debug = debug
 
@@ -43,9 +52,9 @@ class WebUI(object):
         change_setting(settings.PluginsEnabled, True)
 
         # TODO: These settings aren't implemented in QWebEngineSettings (yet)
-        #change_setting(settings.DeveloperExtrasEnabled, True)
-        #change_setting(settings.OfflineStorageDatabaseEnabled, True)
-        #change_setting(settings.OfflineWebApplicationCacheEnabled, True)
+        # change_setting(settings.DeveloperExtrasEnabled, True)
+        # change_setting(settings.OfflineStorageDatabaseEnabled, True)
+        # change_setting(settings.OfflineWebApplicationCacheEnabled, True)
 
         self.view.showMaximized()
 
@@ -55,8 +64,10 @@ class WebUI(object):
         print(host)
         if using_win32:
             import pythoncom
+
             pythoncom.CoInitialize()
         self.flask_app.run(debug=debug, host=host, port=port, use_reloader=False)
+
 
 class CustomWebEnginePage(web_widgets.QWebEnginePage):
     def createWindow(self, _type):

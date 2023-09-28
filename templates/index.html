@@ -17,7 +17,7 @@
     <table class="tg">
     <tbody>
       <tr>
-       PydnaWeb powered by <a href="https://github.com/BjornFJohansson/pydna">pydna {{version}}</a> and Biopython {{bpversion}}
+       PydnaWeb powered by <a href="https://github.com/BjornFJohansson/pydna">pydna {{version}}</a> with Biopython {{bpversion}}
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('pcr')}}" class="btn btn-primary btn-lg btn-block">WebPCR simulator</a></td>
@@ -25,15 +25,19 @@
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('tm')}}" class="btn btn-primary btn-lg btn-block">Primer Tm calculator</a></td>
-        <td class="tg-0pky">Modern melting calculator for single or multiple PCR primers. Based on Biopython.</td>
+        <td class="tg-0pky">Modern melting calculator for single or multiple PCR primers. <a href="https://biopython.org/docs/1.81/api/Bio.SeqUtils.MeltingTemp.html#module-Bio.SeqUtils.MeltingTemp">Bio.SeqUtils.MeltingTemp module.</a></td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('primerdesign')}}" class="btn btn-primary btn-lg btn-block">Primer designer</a></td>
-        <td class="tg-0pky">Design a new primer pair or to design a primer to match an existing primer for a given template.</td>
+        <td class="tg-0pky">Design a new primer pair for a given template or list of templates.</td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('matchingprimer')}}" class="btn btn-primary btn-lg btn-block">Matching primer</a></td>
+        <td class="tg-0pky">Design a primer to match an existing primer for a given template/primer pair or list of such pairs.</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('asmdesign')}}" class="btn btn-primary btn-lg btn-block">Assembly primer designer</a></td>
-        <td class="tg-0pky">Use the assembly primer designer to design primers for linear or circular assembly of a list of sequence fragments.</td>
+        <td class="tg-0pky">Design primers for linear or circular assembly of a list of amplicons or sequence fragments.</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('assembly')}}" class="btn btn-primary btn-lg btn-block">Assembly simulator</a></td>
