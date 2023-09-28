@@ -9,7 +9,6 @@
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         <title>Tm</title>
     </head>
-
     <body>
         <nav class="navbar navbar-inverse">
           <div class="container">
@@ -18,13 +17,8 @@
             </div>
           </div>
         </nav>
-
         <div class="container">
-
-            {% for result in results %}
-                <pre>{{result}}</pre>
-            {% endfor %}
-
+            <pre>{{result}}</pre>
             <div class="row">
            <form action="{{ url_for('tm') }}" method="POST">
             {{form.hidden_tag()}}
@@ -69,7 +63,6 @@
               <tr>
                 <td colspan=4>
                     <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
-                    {{form.clear(class="btn btn-danger")}}
                     {{form.send(class="btn btn-success")}}
                     {{ form.WTF_CSRF_SECRET_KEY }}
                 </td>
@@ -78,6 +71,5 @@
             </table>
            </form>
         </div>
-
     </body>
 </html>
