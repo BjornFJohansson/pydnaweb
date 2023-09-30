@@ -302,7 +302,7 @@ def pcr():
     s = user_data.get("sequences")
 
     if not s:
-        return render_template("pcr.html", form=form, result=None)
+        return render_template("pcr.html", form=form, result="")
 
     sequences = parse(s)
 
@@ -328,33 +328,30 @@ def pcr():
         for amplicon in products:
             result_text += dedent(
                 f"""
-            <amplicon>
-            >{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
-            {amplicon.forward_primer.seq}
-            >{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
-            {amplicon.reverse_primer.seq}
-            >{ann.template.name}
-            {ann.template.seq}
-            </amplicon>
 
             {{}}
+
+
 
             >{amplicon.name}
             {amplicon.seq}
 
+
+
             Taq DNA polymerase
             {{}}
+
             Pfu-Sso7d DNA polymerase
             {{}}
-
-
             """
             )
     result_text = result_text.format(
         amplicon.figure(), amplicon.program(), amplicon.dbd_program()
     )
-    print(result_text)
-    # return redirect(url_for('pcr'))
+
+    # import html
+    # result_text = html.escape(result_text).replace('\n', '<br />')
+
     return render_template("pcr.html", form=form, result=result_text)
 
 

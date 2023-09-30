@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -17,17 +18,30 @@
           </div>
         </nav>
         <div class="container">
-            <pre>{{result}}</pre>
+           <pre id="OutPut">{{result}}</pre>
             <div class="row">
                 <form action="{{ url_for('pcr') }}" method="POST">
 				    {{form.hidden_tag()}}
 				    Homology limit {{form.limit()}} bp
 				    {{form.sequences(cols="100", rows="20")|safe}}
+            </div>
                     <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
 				    {{form.send(class="btn btn-success")}}
 				    {{ form.WTF_CSRF_SECRET_KEY }}
+                    <a href="#" onclick="CopyToClipboard('OutPut');return false;"class="btn btn-warning">Copy Result</a>
+                    <a href="{{url_for('pcr')}}" class="btn btn-danger">clear</a>
                 </form>
-            </div>
         </div>
+		<script>
+		function CopyToClipboard(id)
+		{
+		var r = document.createRange();
+		r.selectNode(document.getElementById(id));
+		window.getSelection().removeAllRanges();
+		window.getSelection().addRange(r);
+		document.execCommand('copy');
+		window.getSelection().removeAllRanges();
+		}
+		</script>
     </body>
 </html>
