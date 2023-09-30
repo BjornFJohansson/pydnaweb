@@ -23,6 +23,10 @@ Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
 	pip install --upgrade flask flask-wtf wtforms pydna
 	git clone https://github.com/BjornFJohansson/pydnaweb.git
 
+Settings uder the "Web" tab in python anywhere:
+
 ![settings](static/settings.png)
+
+Settings in the `/var/www/pydna_pythonanywhere_com_wsgi.py` file:
 
 ![wsgi](static/bjornfjohansson_pythonanywhere_com_wsgi_py.png)
