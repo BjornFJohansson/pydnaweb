@@ -8,6 +8,8 @@ A flask app that make selected [pydna](https://github.com/BjornFJohansson/pydna)
 - Assembly primer designer. Design tailed primers for assembly by HR.
 - Assembly simulator. Assemble a series of sequences by shared homology.
 
+[![webpcr](static/webpcr.png)](http://pydna.pythonanywhere.com/#)
+
 [blogpost](https://ochsavidare.blogspot.com/2013/12/webpcr-pcr-product-simulation.html)
 
 Installed on [pythonanywhere](https://www.pythonanywhere.com) like this:
