@@ -1,1 +1,0 @@
-# Primer Melting Temperature Calculations

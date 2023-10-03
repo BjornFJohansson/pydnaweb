@@ -248,6 +248,12 @@ def index():
     return render_template("index.html", version=version, bpversion=bpversion)
 
 
+@app.route("/docs", methods=["GET", "POST"])
+def docs():
+    """docstring."""
+    return render_template("docs.html")
+
+
 @app.route("/tm", methods=["GET", "POST"])
 def tm():
     """docstring."""

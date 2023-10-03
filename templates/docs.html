@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<style type="text/css">
+td, th { border: 1px solid #c3c3c3; padding: 0 3px 0 3px; }
+table { border-collapse: collapse; }
+img { max-width: 100%; }
+</style>
+<meta name="generator" content="ReText 7.2.3">
+<title>docs</title>
+<style type="text/css">
+</style>
+</head>
+<body>
+<p>Pydnaweb and Pydna development is led by Björn Johansson at the Department of Biology,
+University of Minho. If you have question not answered below, ask in the <a href="https://groups.google.com/g/pydna">Google group</a>
+or create an issue on <a href="https://github.com/BjornFJohansson/pydnaweb/issues">GitHub</a>.</p>
+<h3>WebPCR simulator</h3>
+<p>WebPCR is a web service that can simulate PCR given primers and a template sequence.
+The WebPCR window accepts a list of sequences in <a href="https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats">FASTA or Genbank</a> format (or a mixture of both formats).</p>
+<p>The <strong>last</strong> of the sequences in this list is assumed to be the <strong>template</strong> sequence while all preceding ones are assumed to be PCR primers.</p>
+<p>The simulator will return a text based report describing the PCR product formed.</p>
+<p>The input is a list of sequences in FASTA or Genbank format. Different formats within the list are accepted.</p>
+<p>The last sequence in the list is interpreted as the template sequence, and all preceding
+sequences are primer sequences</p>
+<p>in the example below, MyTemplate is the template and ForwardPrimer and ReversePrimer are primers.</p>
+<pre><code>&gt;ForwardPrimer
+gctactacacacgtactgactg
+
+&gt;ReversePrimer
+tgtggttactgactctatcttg
+
+&gt;MyTemplate
+gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
+</code></pre>
+<p>A report is generated as detailed below.</p>
+<pre><code>Template MyTemplate 48 nt linear:
+ForwardPrimer anneals forward (---&gt;) at 22
+ReversePrimer anneals reverse (&lt;---) at 26
+--------------------------------------------------------------------------------
+
+5gctactacacacgtactgactg...caagatagagtcagtaaccaca3
+                          ||||||||||||||||||||||
+                         3gttctatctcagtcattggtgt5
+5gctactacacacgtactgactg3
+ ||||||||||||||||||||||
+3cgatgatgtgtgcatgactgac...gttctatctcagtcattggtgt5
+
+
+
+&gt;48bp_PCR_prod
+gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
+
+
+
+Taq DNA polymerase
+|95°C|95°C               |    |tmf:62.4
+|____|_____          72°C|72°C|tmr:59.1
+|3min|30s  \ 48.7°C _____|____|45s/kb
+|    |      \______/ 0:30|5min|GC 47%
+|    |       30s         |    |48bp
+
+Pfu-Sso7d DNA polymerase
+|98°C|98°C               |    |tmf:56.7
+|____|_____          72°C|72°C|tmr:53.8
+|30s |10s  \ 56.8°C _____|____|15s/kb
+|    |      \______/ 0:10|5min|GC 47%
+|    |       10s         |    |48bp
+</code></pre>
+<p>WebPCR should handle circular templates well.
+A circular template can be indicated by the Genbank file in the LOCUS line
+or by supplying the keyword "circular" in the template fasta header
+like this:</p>
+<pre><code>&gt;ForwardPrimer
+gatagagtcagtaacc
+
+&gt;ReversePrimer
+cagtcagtacgtgtgt
+
+&gt;MyTemplate circular
+gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
+</code></pre>
+<pre><code>gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
+                             ||||||||||||||||
+     &lt;acacacgtactgactg       gatagagtcagtaacc&gt;
+      ||||||||||||||||
+cgatgatgtgtgcatgactgacggaggttctatctcagtcattggtgt
+</code></pre>
+<h3>Primer Tm calculator</h3>
+<p>https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html
+https://github.com/BjornFJohansson/tm
+https://www.youtube.com/watch?v=OblPqlOOgew
+https://www.youtube.com/watch?v=NufigSvIfA4</p>
+
+</body>
+</html>
