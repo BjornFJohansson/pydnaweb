@@ -4,7 +4,7 @@
 
 mamba activate bjorn311
 
-export FLASK_APP=pydnaweb.py&&export FLASK_ENV=development&&flask run
+export FLASK_APP=pydnaweb.py&&export FLASK_ENV=development&&flask run --debug
 
 echo "press any key to close"
 read -n1 slask

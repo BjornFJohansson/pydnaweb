@@ -12,9 +12,7 @@
     <body>
         <nav class="navbar navbar-inverse">
           <div class="container">
-            <div class="navbar-header">
-              <a class="navbar-brand" href=".">Tm</a>
-            </div>
+            <div class="navbar-header"><h1 class="display-1">Tm</h1></div>
           </div>
         </nav>
         <div class="container">
@@ -25,11 +23,15 @@
             <table class="table-bordered">
             <tbody>
               <tr>
-                <td>{{form.table.label()}}</td>
-                <td colspan=4>{{form.table()}}</td>
+              <td>Algorithm</td>
+              <td colspan=4><a href=https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.Tm_NN>Bio.SeqUtils.MeltingTemp.Tm_NN</a></td>
               </tr>
-                <td>{{form.salt.label()}}</td>
-                <td colspan=4>{{form.salt()}}</td>
+              <tr>
+                <td>{{form.nn_table.label()}}</td>
+                <td colspan=4>{{form.nn_table()}}</td>
+              </tr>
+                <td>{{form.saltcorr.label()}}</td>
+                <td colspan=4>{{form.saltcorr()}}</td>
               </tr>
               <tr>
                 <td>{{form.Na.label()}}</td>
@@ -52,9 +54,6 @@
               <tr>
                 <td>{{form.dnac2.label()}}</td>
                 <td>{{form.dnac2()}} µM</td>
-                <td colspan=4>
-                <a href="{{ url_for('static', filename='info.html') }}" class="btn btn-primary btn-block">info</a>
-                </td>
               </tr>
               <tr>
                 <td colspan=4>
@@ -65,6 +64,8 @@
                     <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
                     {{form.send(class="btn btn-success")}}
                     {{ form.WTF_CSRF_SECRET_KEY }}
+                    <a href="{{url_for('tm')}}" class="btn btn-danger">clear</a>
+                    <a href="{{url_for('docs')}}" class="btn btn-info">documentation</a>
                 </td>
               </tr>
             </tbody>

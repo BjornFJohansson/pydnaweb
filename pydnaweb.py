@@ -3,8 +3,9 @@
 """docstring."""
 
 import datetime
-
 from textwrap import dedent
+
+from flask_wtf import FlaskForm
 
 from flask import Flask
 from flask import redirect
@@ -17,25 +18,42 @@ from werkzeug.datastructures import MultiDict
 from wtforms.fields import SelectField
 from wtforms.fields import DecimalField
 from wtforms.fields import TextAreaField
+from wtforms.fields import StringField
 from wtforms.fields import SubmitField
 from wtforms.fields import RadioField
 from wtforms.fields import IntegerField
 
 from Bio.SeqUtils import MeltingTemp as _mt
+from Bio.SeqUtils.MeltingTemp import Tm_NN
+from Bio import __version__ as bpversion
+
 
 from pydna import __version__ as version
-from Bio import __version__ as bpversion
 from pydna.parsers import parse
+from pydna.readers import read
 from pydna.amplify import Anneal
 from pydna.design import primer_design
 from pydna.design import assembly_fragments
 from pydna.design import circular_assembly_fragments
 from pydna.assembly import Assembly
 from pydna.tm import tm_default
+from pydna.primer import Primer
 
-# from pydna.parsers import parse_assembly_xml
 
-from flask_wtf import FlaskForm
+default = {
+    "Biopython_version": bpversion,
+    "func": f"{Tm_NN.__module__}.{Tm_NN.__name__}",
+    "nn_table": 4,
+    "dnac1": 250,
+    "dnac2": 250,
+    "Na": 40,
+    "K": 0,
+    "Tris": 75.0,
+    "Mg": 1.5,
+    "dNTPs": 0.8,
+    "saltcorr": 7,
+}
+
 
 nn_tableoptions = [
     (1, "DNA_NN1 - Breslauer et al. (1986), " "Proc Natl Acad Sci USA 83: 3746-3750"),
@@ -102,18 +120,22 @@ class WebPCRForm(FlaskForm):
 class TmForm(FlaskForm):
     """docstring."""
 
-    table = SelectField("nn_table", choices=nn_tableoptions, default=4)
-    salt = SelectField("saltcorr", choices=saltoptions, default=7)
-    Na = DecimalField("Na", default=40)
-    Mg = DecimalField("Mg", default=1.5)
-    dnac1 = DecimalField("dnac1", default=250)
-    dnac2 = DecimalField("dnac2", default=250)
+    nn_table = SelectField(
+        "nn_table", choices=nn_tableoptions, default=default["nn_table"]
+    )
+    saltcorr = SelectField("saltcorr", choices=saltoptions, default=default["saltcorr"])
+    Na = DecimalField("Na", default=default["Na"])
+    Mg = DecimalField("Mg", default=default["Mg"])
+    dnac1 = DecimalField("dnac1", default=default["dnac1"])
+    dnac2 = DecimalField("dnac2", default=default["dnac2"])
+    K = DecimalField("K", default=default["K"])
+    Tris = DecimalField("Tris", default=default["Tris"])
+    dNTPs = DecimalField("dNTPs", default=default["dNTPs"])
 
-    K = DecimalField("K", default=0)
-    Tris = DecimalField("Tris", default=75.0)
-    dNTPs = DecimalField("dNTPs", default=0.8)
-
-    primer_text = TextAreaField("primer_text", default=">MyPrimer\nATGGCAGTTGAGAAGA")
+    primer_text = TextAreaField(
+        "primer_text",
+        default=">MyPrimer\nATGGCAGTTGAGAAGA\n\n>another\nagtgtgctagtagtacgtcgta",
+    )
     send = SubmitField("calculate")
     clear = SubmitField("clear")
 
@@ -129,6 +151,15 @@ class PrimerDesignForm(FlaskForm):
     agagtacttgactaacccaaagaaatatattcctggtaccaagatggcctttg
     gtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaa
     gcctgtgagtaa
+
+    >CYC7 YEL039C S. cerevisiae Cytochrome c, isoform 2
+    ATGGCTAAAGAAAGTACGGGATTCAAACCAGGCTCTGCAAAAAAGGGTGCTAC
+    ATTGTTTAAAACGAGGTGTCAGCAGTGTCATACAATAGAAGAGGGTGGTCCTA
+    ACAAAGTTGGACCTAATTTACATGGTATTTTTGGTAGACATTCAGGTCAGGTA
+    AAGGGTTATTCTTACACAGATGCAAACATCAACAAGAACGTCAAATGGGATGA
+    GGATAGTATGTCCGAGTACTTGACGAACCCAAAGAAATATATTCCTGGTACCA
+    AGATGGCGTTTGCCGGGTTGAAGAAGGAAAAGGACAGAAACGATTTAATTACT
+    TATATGACAAAGGCTGCCAAATAG
     """
     )
     sequences = TextAreaField("sequences", default=default)
@@ -170,35 +201,37 @@ class AssemblyDesignForm(FlaskForm):
     tails = IntegerField("Tails", default=30)
     maxlink = IntegerField("maxlink", default=30)
     overlap = IntegerField("overlap", default=30)
+    separator = StringField("separator", default="<======>")
 
     default = dedent(
-        """\
-    <assembly>
-      <amplicon>
-         >f50 14-mer
-         CCCGTACAAAGGGA
-         >r50 12-mer
-         CTGATGCCGCGC
-         >a
-         CCCGTACAAAGGGAACATCCACACTTTGGTGAATCGAAGCGCGGCATCAG
-      </amplicon>
-      <fragment>
-         >b
-         GATTTCCTTTTGGATACCTGAAACAAAGCCCATCGTGGTCCTTAGACTT
-      </fragment>
-      <amplicon>
-         >f48 13-mer
-         TCCCTACACCGAC
-         >r48 16-mer
-         ATGAAGCTCGTCACAT
-         >c
-         TCCCTACACCGACGTACGATGCAACTGTGTGGATGTGACGAGCTTCAT
-      </amplicon>
-    </assembly>
+        f"""\
+
+        >f50 21-mer
+        CTTTCGAGAATACCAGAAAAA
+        >r50 21-mer
+        GTACAAGAATTGCACAATTCA
+        >a
+        CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTAC
+
+        {separator.kwargs.get("default")}
+
+        >b
+        GATTTCCTTTTGGATACCTGAAACAAAGCCCATCGTGGTCCTTAGACTT
+
+        {separator.kwargs.get("default")}
+
+        >f48 22-mer
+        CTTCATAAATAGATTGCCATAC
+        >r48 22-mer
+        ACTTTTTACTGATTCATAAGCT
+        >c
+        CTTCATAAATAGATTGCCATACATAGAGCTTATGAATCAGTAAAAAGT
+
+
     """
     )
 
-    xml = TextAreaField("xml", default=default)
+    sequences = TextAreaField("sequences", default=default)
     send = SubmitField("calculate")
     clear = SubmitField("clear")
 
@@ -216,13 +249,13 @@ class AssemblyForm(FlaskForm):
     default = dedent(
         """\
     >a
-    acgatgctatactgCCCCCtgtgctgtgctcta
+    atgaggcgcttttaaatatggcgaaAtaagtgatttaacgctttgaatatg
 
     >b
-    tgtgctgtgctctaTTTTTtattctggctgtatc
+    taagtgatttaacgctttgaatatgCCactatatacttaaatttgatttcgt
 
     >c
-    tattctggctgtatcGGGGGtacgatgctatactg
+    actatatacttaaatttgatttcgtGGGatgaggcgcttttaaatatggcgaa
     """
     )
 
@@ -254,53 +287,9 @@ def docs():
     return render_template("docs.html")
 
 
-@app.route("/tm", methods=["GET", "POST"])
-def tm():
-    """docstring."""
-    # if 'clear' in request.form:
-    #     tm_results.clear()
-    #     return redirect(url_for('tm'))
-
-    user_data = request.form or {}
-
-    form = TmForm(formdata=MultiDict(user_data))
-
-    if request.method == "GET":
-        return render_template("tm.html", form=form, result="")
-
-    primers = parse(user_data["primer_text"])
-
-    for primer in primers:
-        tm = tm_default(
-            primer.seq,
-            check=True,
-            strict=True,
-            c_seq=None,
-            shift=0,
-            nn_table=nn_tables[user_data["table"]],
-            tmm_table=None,
-            imm_table=None,
-            de_table=None,
-            dnac1=float(user_data["dnac1"]),
-            dnac2=float(user_data["dnac2"]),
-            selfcomp=False,
-            Na=float(user_data["Na"]),
-            K=float(user_data["K"]),
-            Tris=float(user_data["Tris"]),
-            Mg=float(user_data["Mg"]),
-            dNTPs=float(user_data["dNTPs"]),
-            saltcorr=int(user_data["salt"]),
-        )
-        primer.description = f"tm={round(tm, 3)}"
-        tm_results = primer.format("fasta")
-    # return redirect(url_for('tm'))
-    return render_template("tm.html", form=form, result=tm_results)
-
-
 @app.route("/pcr", methods=["GET", "POST"])
 def pcr():
     """docstring."""
-
     user_data = request.form or {}
 
     form = WebPCRForm(formdata=MultiDict(user_data))
@@ -308,7 +297,7 @@ def pcr():
     s = user_data.get("sequences")
 
     if not s:
-        return render_template("pcr.html", form=form, result="")
+        return render_template("pcr.html", form=form)
 
     sequences = parse(s)
 
@@ -316,8 +305,8 @@ def pcr():
 
     primer_sequences = sequences
 
-    homology_limit = 12
-    cutoff_detailed_figure = 6
+    homology_limit = int(user_data.get("limit")) or 12
+
     cutoff_detailed_figure = 5
 
     ann = Anneal(primer_sequences, template, limit=homology_limit)
@@ -330,91 +319,80 @@ def pcr():
         result_text += ann.report().strip()
 
     elif 1 <= len(products) <= cutoff_detailed_figure:
-        result_text += f"{ann.report()}\n" f"{separator}"
+        result_text += f"{ann.report()}\n\n---\n"
+
         for amplicon in products:
             result_text += dedent(
                 f"""
+Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
 
-            {{}}
+Taq DNA polymerase
+{amplicon.program()}
 
+>{amplicon.name}
+{amplicon.seq}
 
-
-            >{amplicon.name}
-            {amplicon.seq}
-
-
-
-            Taq DNA polymerase
-            {{}}
-
-            Pfu-Sso7d DNA polymerase
-            {{}}
-            """
+---
+"""
             )
-    result_text = result_text.format(
-        amplicon.figure(), amplicon.program(), amplicon.dbd_program()
-    )
 
-    # import html
-    # result_text = html.escape(result_text).replace('\n', '<br />')
+    else:
+        result_text += "\n" + ann.template.format("gb")
 
-    return render_template("pcr.html", form=form, result=result_text)
+    return render_template("result.html", result=result_text)
 
 
 @app.route("/primerdesign", methods=["GET", "POST"])
 def primerdesign():
     """docstring."""
-    # if 'clear' in request.form:
-    #     primer_design_results.clear()
-    #     return redirect(url_for('primerdesign'))
 
     user_data = request.form or {}
 
     form = PrimerDesignForm(formdata=MultiDict(user_data))
 
-    if request.method == "GET":
-        return render_template("primerdesign.html", form=form, result="")
+    if request.method == "GET" or not user_data.get("sequences"):
+        return render_template("primerdesign.html", form=form)
 
     templates = parse(user_data["sequences"])
 
     homology_limit = 12
 
     amplicon = None
+    result_text = ""
 
     for template in templates:
-        amplicon = primer_design(template, limit=homology_limit)
+        amplicon = primer_design(template, limit=homology_limit)  # TODO Tm_NN
 
         if amplicon:
-            result_text = dedent(
-                f"""
-            >{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
-            {amplicon.forward_primer.seq}
-            >{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
-            {amplicon.reverse_primer.seq}
-            >{amplicon.template.name}
-            {amplicon.template.seq}
+            result_text += f"""
+>{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
+{amplicon.forward_primer.seq}
+>{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
+{amplicon.reverse_primer.seq}
+>{amplicon.template.name}
+{amplicon.template.seq}
 
-            """
-            )
-            result_text = result_text.format(
-                amplicon.figure(), amplicon.program(), amplicon.dbd_program()
-            )
+Taq DNA polymerase
+{amplicon.program()}
 
-    return render_template("primerdesign.html", form=form, result=result_text)
+>{amplicon.name}
+{amplicon.seq}
+
+---
+"""
+
+    return render_template("result.html", form=form, result=result_text)
 
 
 @app.route("/matchingprimer", methods=["GET", "POST"])
 def matchingprimer():
     """docstring."""
-    # if 'clear' in request.form:
-    #     matching_primer_results.clear()
-    #     return redirect(url_for('matchingprimer'))
 
     user_data = request.form or {}
 
     form = MatchingPrimerForm(formdata=MultiDict(user_data))
 
-    if request.method == "GET":
+    if request.method == "GET" or not user_data.get("sequences"):
         return render_template("matchingprimer.html", form=form, result="")
 
     templates = parse(user_data["sequences"])
@@ -423,80 +401,106 @@ def matchingprimer():
 
     amplicon = None
 
+    result_text = ""
+
     for p, template in zip(templates[::2], templates[1::2]):
         try:
-            amplicon = primer_design(template, fp=p, limit=homology_limit)
-        except IndexError:  # ValueError
+            amplicon = primer_design(template, fp=p, limit=homology_limit)  # TODO Tm_NN
+        except ValueError:  # ValueError
             pass
         try:
-            amplicon = primer_design(template, rp=p, limit=homology_limit)
-        except IndexError:  # ValueError
+            amplicon = primer_design(template, rp=p, limit=homology_limit)  # TODO Tm_NN
+        except ValueError:  # ValueError
             pass
 
         if not amplicon:
             result_text = "Primer does not anneal."
         else:
-            result_text = dedent(
-                f"""
+            result_text += f"""\
 
-            >{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
-            {amplicon.forward_primer.seq}
-            >{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
-            {amplicon.reverse_primer.seq}
-            >{amplicon.template.name}
-            {amplicon.template.seq}
+>{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
+{amplicon.forward_primer.seq}
+>{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
+{amplicon.reverse_primer.seq}
+>{amplicon.template.name}
+{amplicon.template.seq}
 
-            """
-            )
+"""
 
-    return render_template("matchingprimer.html", form=form, result=result_text)
+    return render_template("result.html", form=form, result=result_text)
 
 
 @app.route("/asmdesign", methods=["GET", "POST"])
 def asmdesign():
     """docstring."""
-    # if 'clear' in request.form:
-    #     asmdesign_results.clear()
-    #     return redirect(url_for('asmdesign'))
 
     user_data = request.form or {}
 
     form = AssemblyDesignForm(formdata=MultiDict(user_data))
 
-    if request.method == "GET":
+    if request.method == "GET" or not user_data.get("sequences"):
         return render_template("asmdesign.html", form=form, result="")
 
-    sequences = parse_assembly_xml(user_data["xml"])
+    separator = user_data["separator"]
+    items = user_data["sequences"].split(separator)
+    sequences = []
 
-    if user_data["topology"] == "linear":
-        fragments = assembly_fragments(
-            sequences,
-            overlap=int(user_data["overlap"]),
-            maxlink=int(user_data["maxlink"]),
-        )
-    else:
-        fragments = circular_assembly_fragments(
-            sequences,
-            overlap=int(user_data["overlap"]),
-            maxlink=int(user_data["maxlink"]),
-        )
+    for item in items:
+        try:
+            fp, rp, tp = parse(item)
+        except ValueError:
+            try:
+                seq = read(item)
+            except ValueError:
+                pass
+        else:
+            ann = Anneal((fp, rp), tp, limit=12)  # TODO Tm_NN
 
-    result_text = "\n".join(item.format("fasta") for item in fragments)
+            seq, *rest = ann.products
 
-    return render_template("asmdesign.html", form=form, result=result_text)
+        sequences.append(seq)
+
+    alg = {
+        "linear": assembly_fragments,  # TODO Tm_NN
+        "circular": circular_assembly_fragments,
+    }[
+        user_data["topology"]
+    ]  # TODO Tm_NN
+
+    fragments = alg(
+        sequences,
+        overlap=int(user_data["overlap"]),
+        maxlink=int(user_data["maxlink"]),
+    )
+
+    result_items = []
+    for item in fragments:
+        if hasattr(item, "template"):
+            result_items.append(
+                (
+                    f"{item.forward_primer.format('fasta')}"
+                    f"{item.forward_primer.format('fasta')}"
+                    f"{item.template.format('fasta')}\n"
+                    f"{item.format('fasta')}"
+                )
+            )
+        else:
+            result_items.append(item.format("fasta"))
+
+    result_text = f"\n{separator}\n".join(result_items)
+    return render_template("result.html", form=form, result=result_text)
 
 
 @app.route("/assembly", methods=["GET", "POST"])
 def assembly():
     """docstring."""
-
     form = AssemblyForm()
 
     user_data = request.form or {}
 
-    if request.method == "GET":
+    if request.method == "GET" or not user_data.get("sequences"):
         form.topology.data = user_data.get("topology", "linear")
-        form.limit.data = user_data.get("limit", 30)
+        form.limit.data = user_data.get("limit", 25)
         return render_template("assembly.html", form=form, result="")
 
     sequences = parse(user_data["sequences"])
@@ -510,9 +514,57 @@ def assembly():
         f"{candidate.figure()}\n\n" f"{candidate.format('fasta')}"
         for candidate in candidates
     )
-    print(assembly_results)
+
     # return redirect(url_for('assembly'))
-    return render_template("assembly.html", form=form, result=assembly_results)
+    return render_template("result.html", form=form, result=assembly_results)
+
+
+@app.route("/tm", methods=["GET", "POST"])
+def tm():
+    """docstring."""
+
+    user_data = request.form or {}
+
+    form = TmForm(formdata=MultiDict(user_data))
+
+    if request.method == "GET":
+        return render_template("tm.html", form=form, result="")
+
+    primers = parse(user_data["primer_text"])
+
+    tm_results = f"Biopython v{default['Biopython_version']} "
+    tm_results += f"Algorithm: {default['func']}\nArguments: "
+    tm_results += ", ".join(
+        f"{k}: {user_data[k]}" for k in default.keys() if k in user_data.keys()
+    )
+    tm_results += "\n\n"
+
+    for primer in primers:
+        tm = tm_default(
+            primer.seq,
+            check=True,
+            strict=True,
+            c_seq=None,
+            shift=0,
+            nn_table=nn_tables[user_data["nn_table"]],
+            tmm_table=None,
+            imm_table=None,
+            de_table=None,
+            dnac1=float(user_data["dnac1"]),
+            dnac2=float(user_data["dnac2"]),
+            selfcomp=False,
+            Na=float(user_data["Na"]),
+            K=float(user_data["K"]),
+            Tris=float(user_data["Tris"]),
+            Mg=float(user_data["Mg"]),
+            dNTPs=float(user_data["dNTPs"]),
+            saltcorr=int(user_data["saltcorr"]),
+        )
+        primer.description = f"tm={round(tm, 3)}"
+
+    tm_results += "\n".join(p.format("fasta") for p in primers)
+
+    return render_template("result.html", form=form, result=tm_results)
 
 
 if __name__ == "__main__":

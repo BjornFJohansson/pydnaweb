@@ -24,26 +24,29 @@
         <td class="tg-0pky">Simulate PCR if you already have a pair of primers and a template sequence.</td>
       </tr>
       <tr>
-        <td class="tg-0pky"><a href="{{url_for('tm')}}" class="btn btn-primary btn-lg btn-block">Primer Tm calculator</a></td>
-        <td class="tg-0pky">Modern melting calculator for single or multiple PCR primers. <a href="https://biopython.org/docs/1.81/api/Bio.SeqUtils.MeltingTemp.html#module-Bio.SeqUtils.MeltingTemp">Bio.SeqUtils.MeltingTemp module.</a></td>
-      </tr>
-      <tr>
         <td class="tg-0pky"><a href="{{url_for('primerdesign')}}" class="btn btn-primary btn-lg btn-block">Primer designer</a></td>
-        <td class="tg-0pky">Design a new primer pair for a given template or list of templates.</td>
+        <td class="tg-0pky">Design a new primer pair for a template sequence or list of template sequences.</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('matchingprimer')}}" class="btn btn-primary btn-lg btn-block">Matching primer</a></td>
-        <td class="tg-0pky">Design a primer to match an existing primer for a given template/primer pair or list of such pairs.</td>
+        <td class="tg-0pky">Design a primer to match an existing primer for a primer/template pair or list of such pairs.</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('asmdesign')}}" class="btn btn-primary btn-lg btn-block">Assembly primer designer</a></td>
-        <td class="tg-0pky">Design primers for linear or circular assembly of a list of amplicons or sequence fragments.(Under development, not yet functional)</td>
+        <td class="tg-0pky">Design primers for linear or circular assembly of a list of amplicons or sequence fragments. 👷</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('assembly')}}" class="btn btn-primary btn-lg btn-block">Assembly simulator</a></td>
-        <td class="tg-0pky">Use the assembly simulator to for linear or circular assembly of a list of sequence fragments.</td>
+        <td class="tg-0pky">Simulator for linear or circular assembly of a list of sequence fragments.</td>
       </tr>
-
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('tm')}}" class="btn btn-primary btn-lg btn-block">Primer Tm calculator</a></td>
+        <td class="tg-0pky">Melting temperature calculator for PCR primers. Uses the <a href="https://biopython.org/docs/1.81/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.Tm_NN">Bio.SeqUtils.MeltingTemp.Tm_NN</a> function from <a href="https://github.com/biopython/biopython#readme">Biopython</a>. </td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('docs')}}" class="btn btn-info btn-lg btn-block">Documentation</a></td>
+        <td class="tg-0pky">Documentation and examples.</td>
+      </tr>
     </tbody>
     </table>
 

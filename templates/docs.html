@@ -13,18 +13,18 @@ img { max-width: 100%; }
 </style>
 </head>
 <body>
-<p>Pydnaweb and Pydna development is led by Björn Johansson at the Department of Biology,
-University of Minho. If you have question not answered below, ask in the <a href="https://groups.google.com/g/pydna">Google group</a>
+<h1>Pydnaweb</h1>
+<p>Pydnaweb is a flask application that exposes some of the functionality of the <a href="https://github.com/BjornFJohansson/pydna#readme">pydna</a> Python package as an online service.</p>
+<p>Development of Pydna/Pydnaweb is led by <a href="">Björn Johansson</a> at the Department of Biology, University of Minho.</p>
+<p>If you have question not answered below or suggestions, please ask in the <a href="https://groups.google.com/g/pydna">Google group</a> (preferred)
 or create an issue on <a href="https://github.com/BjornFJohansson/pydnaweb/issues">GitHub</a>.</p>
+<p>All tools accept sequences in <a href="https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats">FASTA or Genbank</a> format. The formats can be mixed.</p>
 <h3>WebPCR simulator</h3>
-<p>WebPCR is a web service that can simulate PCR given primers and a template sequence.
-The WebPCR window accepts a list of sequences in <a href="https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats">FASTA or Genbank</a> format (or a mixture of both formats).</p>
-<p>The <strong>last</strong> of the sequences in this list is assumed to be the <strong>template</strong> sequence while all preceding ones are assumed to be PCR primers.</p>
-<p>The simulator will return a text based report describing the PCR product formed.</p>
-<p>The input is a list of sequences in FASTA or Genbank format. Different formats within the list are accepted.</p>
-<p>The last sequence in the list is interpreted as the template sequence, and all preceding
-sequences are primer sequences</p>
-<p>in the example below, MyTemplate is the template and ForwardPrimer and ReversePrimer are primers.</p>
+<p>WebPCR simulates PCR given at least two primers and a template sequence as
+a list.</p>
+<p>The <strong>last</strong> of the sequences in this list is assumed to be the <strong>template</strong>
+sequence while all preceding sequences are assumed to be primers.</p>
+<p>The example below, shows the template MyTemplate, ForwardPrimer and ReversePrimer.</p>
 <pre><code>&gt;ForwardPrimer
 gctactacacacgtactgactg
 
@@ -34,11 +34,12 @@ tgtggttactgactctatcttg
 &gt;MyTemplate
 gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
 </code></pre>
-<p>A report is generated as detailed below.</p>
-<pre><code>Template MyTemplate 48 nt linear:
+<p>A report is generated as detailed below:</p>
+<pre><code>
+Template MyTemplate 48 bp linear limit=16:
 ForwardPrimer anneals forward (---&gt;) at 22
 ReversePrimer anneals reverse (&lt;---) at 26
---------------------------------------------------------------------------------
+
 
 5gctactacacacgtactgactg...caagatagagtcagtaaccaca3
                           ||||||||||||||||||||||
@@ -48,30 +49,14 @@ ReversePrimer anneals reverse (&lt;---) at 26
 3cgatgatgtgtgcatgactgac...gttctatctcagtcattggtgt5
 
 
-
-&gt;48bp_PCR_prod
-gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
-
-
-
 Taq DNA polymerase
 |95°C|95°C               |    |tmf:62.4
 |____|_____          72°C|72°C|tmr:59.1
 |3min|30s  \ 48.7°C _____|____|45s/kb
 |    |      \______/ 0:30|5min|GC 47%
 |    |       30s         |    |48bp
-
-Pfu-Sso7d DNA polymerase
-|98°C|98°C               |    |tmf:56.7
-|____|_____          72°C|72°C|tmr:53.8
-|30s |10s  \ 56.8°C _____|____|15s/kb
-|    |      \______/ 0:10|5min|GC 47%
-|    |       10s         |    |48bp
 </code></pre>
-<p>WebPCR should handle circular templates well.
-A circular template can be indicated by the Genbank file in the LOCUS line
-or by supplying the keyword "circular" in the template fasta header
-like this:</p>
+<p>WebPCR can handle circular templates. A circular template can be indicated by the Genbank file on the LOCUS line or by supplying the keyword "circular" in the FASTA header like this:</p>
 <pre><code>&gt;ForwardPrimer
 gatagagtcagtaacc
 
@@ -81,17 +66,56 @@ cagtcagtacgtgtgt
 &gt;MyTemplate circular
 gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
 </code></pre>
-<pre><code>gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
-                             ||||||||||||||||
-     &lt;acacacgtactgactg       gatagagtcagtaacc&gt;
-      ||||||||||||||||
-cgatgatgtgtgcatgactgacggaggttctatctcagtcattggtgt
+<p>As the forward primer anneals after the reverse primer, no PCR product would be
+formed on a linear template. On a circular template, the amplification occurs
+across the origin of the sequence.</p>
+<pre><code>
+Template MyTemplate 48 bp circular limit=16:
+ForwardPrimer anneals forward (---&gt;) at 45
+ReversePrimer anneals reverse (&lt;---) at 6
+
+
+5gatagagtcagtaacc...acacacgtactgactg3
+                    ||||||||||||||||
+                   3tgtgtgcatgactgac5
+5gatagagtcagtaacc3
+ ||||||||||||||||
+3ctatctcagtcattgg...tgtgtgcatgactgac5
+
+
+Taq DNA polymerase
+|95°C|95°C               |    |tmf:48.5
+|____|_____          72°C|72°C|tmr:53.7
+|3min|30s  \ 43.4°C _____|____|45s/kb
+|    |      \______/ 0:30|5min|GC 46%
+|    |       30s         |    |41bp
+
+
+Pfu-Sso7d DNA polymerase
+|98°C|98°C               |    |tmf:42.1
+|____|_____          72°C|72°C|tmr:48.9
+|30s |10s  \ 45.1°C _____|____|15s/kb
+|    |      \______/ 0:10|5min|GC 46%
+|    |       10s         |    |41bp
+
+
+&gt;41bp_PCR_prod
+gatagagtcagtaaccacagctactacacacgtactgactg
+
+
+
 </code></pre>
 <h3>Primer Tm calculator</h3>
-<p>https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html
-https://github.com/BjornFJohansson/tm
-https://www.youtube.com/watch?v=OblPqlOOgew
-https://www.youtube.com/watch?v=NufigSvIfA4</p>
+<p>Calculates the melting temperature for a list of primer sequences using
+data and a the <a href="https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.Tm_NN">Bio.SeqUtils.MeltingTemp.Tm_NN</a> function.</p>
+<p>There are many online primer melting calculators available <a href="https://www.google.com/search?q=primer+melting+temperature+calculator">online</a>, but they rarely expose all the details of algorithms and data used.</p>
+<p>For details on the decisions for the default values see <a href="https://github.com/BjornFJohansson/tm/blob/master/tm.ipynb">here</a>.</p>
+<p><a href="https://www.youtube.com/watch?v=NufigSvIfA4"><img alt="" src="/static/yt.png"></a></p>
+<h3>Primer designer</h3>
+<p>Designs primers for one or more sequences.</p>
+<h3>Matching primer</h3>
+<h3>Assembly primer designer</h3>
+<h3>Assembly simulator</h3>
 
 </body>
 </html>

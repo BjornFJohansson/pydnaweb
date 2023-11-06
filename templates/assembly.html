@@ -11,9 +11,7 @@
     <body>
         <nav class="navbar navbar-inverse">
           <div class="container">
-            <div class="navbar-header">
-              <a class="navbar-brand" href=".">Assembly</a>
-            </div>
+            <div class="navbar-header"><h1 class="display-1">Assembly</h1></div>
           </div>
         </nav>
         <div class="container">
@@ -27,9 +25,12 @@
 				    {% endfor %}
 				    Homology limit {{form.limit()}} bp
 				    {{form.sequences(cols="100", rows="20")|safe}}
+                 </div>
 				    <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
 				    {{form.send(class="btn btn-success")}}
 				    {{ form.WTF_CSRF_SECRET_KEY }}
+                    <a href="{{url_for('assembly')}}" class="btn btn-danger">clear</a>
+                    <a href="{{url_for('docs')}}" class="btn btn-info">documentation</a>
                 </form>
         </div>
     </body>

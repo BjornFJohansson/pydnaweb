@@ -1,22 +1,23 @@
-Pydnaweb and Pydna development is led by Björn Johansson at the Department of Biology,
-University of Minho. If you have question not answered below, ask in the [Google group](https://groups.google.com/g/pydna)
+# Pydnaweb
+
+Pydnaweb is a flask application that exposes some of the functionality of the [pydna](https://github.com/BjornFJohansson/pydna#readme) Python package as an online service.
+
+Development of Pydna/Pydnaweb is led by [Björn Johansson]() at the Department of Biology, University of Minho.
+
+If you have question not answered below or suggestions, please ask in the [Google group](https://groups.google.com/g/pydna) (preferred)
 or create an issue on [GitHub](https://github.com/BjornFJohansson/pydnaweb/issues).
+
+All tools accept sequences in [FASTA or Genbank](https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats) format. The formats can be mixed.
 
 ### WebPCR simulator
 
-WebPCR is a web service that can simulate PCR given primers and a template sequence.
-The WebPCR window accepts a list of sequences in [FASTA or Genbank](https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats) format (or a mixture of both formats).
+WebPCR simulates PCR given at least two primers and a template sequence as
+a list.
 
-The **last** of the sequences in this list is assumed to be the **template** sequence while all preceding ones are assumed to be PCR primers.
+The **last** of the sequences in this list is assumed to be the **template**
+sequence while all preceding sequences are assumed to be primers.
 
-The simulator will return a text based report describing the PCR product formed.
-
-The input is a list of sequences in FASTA or Genbank format. Different formats within the list are accepted.
-
-The last sequence in the list is interpreted as the template sequence, and all preceding
-sequences are primer sequences
-
-in the example below, MyTemplate is the template and ForwardPrimer and ReversePrimer are primers.
+The example below, shows the template MyTemplate, ForwardPrimer and ReversePrimer.
 
 ```
 >ForwardPrimer
@@ -29,13 +30,15 @@ tgtggttactgactctatcttg
 gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
 ```
 
-A report is generated as detailed below.
+A report is generated as detailed below:
+
 
 ```
-Template MyTemplate 48 nt linear:
+
+Template MyTemplate 48 bp linear limit=16:
 ForwardPrimer anneals forward (--->) at 22
 ReversePrimer anneals reverse (<---) at 26
---------------------------------------------------------------------------------
+
 
 5gctactacacacgtactgactg...caagatagagtcagtaaccaca3
                           ||||||||||||||||||||||
@@ -45,31 +48,17 @@ ReversePrimer anneals reverse (<---) at 26
 3cgatgatgtgtgcatgactgac...gttctatctcagtcattggtgt5
 
 
-
->48bp_PCR_prod
-gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
-
-
-
 Taq DNA polymerase
 |95°C|95°C               |    |tmf:62.4
 |____|_____          72°C|72°C|tmr:59.1
 |3min|30s  \ 48.7°C _____|____|45s/kb
 |    |      \______/ 0:30|5min|GC 47%
 |    |       30s         |    |48bp
-
-Pfu-Sso7d DNA polymerase
-|98°C|98°C               |    |tmf:56.7
-|____|_____          72°C|72°C|tmr:53.8
-|30s |10s  \ 56.8°C _____|____|15s/kb
-|    |      \______/ 0:10|5min|GC 47%
-|    |       10s         |    |48bp
 ```
 
-WebPCR should handle circular templates well.
-A circular template can be indicated by the Genbank file in the LOCUS line
-or by supplying the keyword "circular" in the template fasta header
-like this:
+WebPCR can handle circular templates. A circular template can be indicated by the Genbank file on the LOCUS line or by supplying the keyword "circular" in the FASTA header like this:
+
+
 ```
 >ForwardPrimer
 gatagagtcagtaacc
@@ -81,26 +70,70 @@ cagtcagtacgtgtgt
 gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
 ```
 
+As the forward primer anneals after the reverse primer, no PCR product would be
+formed on a linear template. On a circular template, the amplification occurs
+across the origin of the sequence.
+
 ```
-gctactacacacgtactgactgcctccaagatagagtcagtaaccaca
-                             ||||||||||||||||
-     <acacacgtactgactg       gatagagtcagtaacc>
-      ||||||||||||||||
-cgatgatgtgtgcatgactgacggaggttctatctcagtcattggtgt
+
+Template MyTemplate 48 bp circular limit=16:
+ForwardPrimer anneals forward (--->) at 45
+ReversePrimer anneals reverse (<---) at 6
+
+
+5gatagagtcagtaacc...acacacgtactgactg3
+                    ||||||||||||||||
+                   3tgtgtgcatgactgac5
+5gatagagtcagtaacc3
+ ||||||||||||||||
+3ctatctcagtcattgg...tgtgtgcatgactgac5
+
+
+Taq DNA polymerase
+|95°C|95°C               |    |tmf:48.5
+|____|_____          72°C|72°C|tmr:53.7
+|3min|30s  \ 43.4°C _____|____|45s/kb
+|    |      \______/ 0:30|5min|GC 46%
+|    |       30s         |    |41bp
+
+
+Pfu-Sso7d DNA polymerase
+|98°C|98°C               |    |tmf:42.1
+|____|_____          72°C|72°C|tmr:48.9
+|30s |10s  \ 45.1°C _____|____|15s/kb
+|    |      \______/ 0:10|5min|GC 46%
+|    |       10s         |    |41bp
+
+
+>41bp_PCR_prod
+gatagagtcagtaaccacagctactacacacgtactgactg
+
+
+
 ```
+
+
 
 ### Primer Tm calculator
 
-https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html
+Calculates the melting temperature for a list of primer sequences using
+data and a the [Bio.SeqUtils.MeltingTemp.Tm_NN](https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.Tm_NN) function.
+
+There are many online primer melting calculators available [online](https://www.google.com/search?q=primer+melting+temperature+calculator), but they rarely expose all the details of algorithms and data used.
 
 
-https://github.com/BjornFJohansson/tm
+For details on the decisions for the default values see [here](https://github.com/BjornFJohansson/tm/blob/master/tm.ipynb).
 
 
-https://www.youtube.com/watch?v=OblPqlOOgew
+[![](/static/yt.png)](https://www.youtube.com/watch?v=NufigSvIfA4)
 
 
-https://www.youtube.com/watch?v=NufigSvIfA4
+### Primer designer
 
+Designs primers for one or more sequences.
 
-https://www.youtube.com/watch?v=mcOwlFVEino
+### Matching primer
+
+### Assembly primer designer
+
+### Assembly simulator

@@ -11,9 +11,8 @@
     <body>
         <nav class="navbar navbar-inverse">
           <div class="container">
-            <div class="navbar-header">
-              <a class="navbar-brand" href=".">Assembly Primer Design (Under development, not yet functional)</a>
-            </div>
+            <div class="navbar-header"><h1 class="display-1">Assembly Primer Design 👷</h1></div>
+
           </div>
         </nav>
         <div class="container">
@@ -32,6 +31,10 @@
                         <td>{{form.maxlink()}}</td>
                       </tr>
                       <tr>
+                        <td>{{form.separator.label()}}</td>
+                        <td>{{form.separator()}}</td>
+                      </tr>
+                      <tr>
                         <td>	{{form.topology.label()}}</td>
                         <td>{% for subfield in form.topology %}
                               {{ subfield }}
@@ -40,7 +43,7 @@
                       </tr>
                       <tr>
                        <td colspan=2>
-                        {{form.xml(cols="100", rows="25")|safe}}
+                        {{form.sequences(cols="100", rows="25")|safe}}
                        </td>
                       </tr>
                       <tr>
@@ -48,6 +51,8 @@
                         <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
                          {{form.send(class="btn btn-success")}}
                          {{ form.WTF_CSRF_SECRET_KEY }}
+                       <a href="{{url_for('asmdesign')}}" class="btn btn-danger">clear</a>
+                       <a href="{{url_for('docs')}}" class="btn btn-info">documentation</a>
                        </td>
                      </tr>
                     </tbody>
