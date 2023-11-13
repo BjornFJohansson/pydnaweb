@@ -130,9 +130,35 @@ For details on the decisions for the default values see [here](https://github.co
 
 ### Primer designer
 
-Designs primers for one or more sequences.
+Designs primers for one or more template sequences.
+Three sequences are returned for each input sequence, representing the
+two primers and the original sequence, followed by a suggested PCR program.
+
+```
+
+>f40 12-mer
+GTCCCCGAGGCG
+>r40 19-mer
+CTTCTACAAAACCGCGTCA
+>seq
+GTCCCCGAGGCGGACACTGATTGACGCGGTTTTGTAGAAG
+
+Taq DNA polymerase
+|95°C|95°C               |    |tmf:59.9
+|____|_____          72°C|72°C|tmr:59.8
+|3min|30s  \ 49.7°C _____|____|45s/kb
+|    |      \______/ 0:30|5min|GC 57%
+|    |       30s         |    |40bp
+
+>40bp_PCR_prod
+GTCCCCGAGGCGGACACTGATTGACGCGGTTTTGTAGAAG
+
+```
+
 
 ### Matching primer
+
+
 
 ### Assembly primer designer
 

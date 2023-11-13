@@ -8,10 +8,8 @@ from textwrap import dedent
 from flask_wtf import FlaskForm
 
 from flask import Flask
-from flask import redirect
 from flask import render_template
 from flask import request
-from flask import url_for
 
 from werkzeug.datastructures import MultiDict
 
@@ -326,6 +324,8 @@ def pcr():
                 f"""
 Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
 
+{amplicon.figure()}
+
 Taq DNA polymerase
 {amplicon.program()}
 
@@ -424,6 +424,16 @@ def matchingprimer():
 {amplicon.reverse_primer.seq}
 >{amplicon.template.name}
 {amplicon.template.seq}
+
+{amplicon.figure()}
+
+Taq DNA polymerase
+{amplicon.program()}
+
+>{amplicon.name}
+{amplicon.seq}
+
+---
 
 """
 
