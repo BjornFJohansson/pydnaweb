@@ -206,8 +206,10 @@ class AssemblyDesignForm(FlaskForm):
 
         >f50 21-mer
         CTTTCGAGAATACCAGAAAAA
+
         >r50 21-mer
         GTACAAGAATTGCACAATTCA
+
         >a
         CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTAC
 
@@ -220,8 +222,10 @@ class AssemblyDesignForm(FlaskForm):
 
         >f48 22-mer
         CTTCATAAATAGATTGCCATAC
+
         >r48 22-mer
         ACTTTTTACTGATTCATAAGCT
+
         >c
         CTTCATAAATAGATTGCCATACATAGAGCTTATGAATCAGTAAAAAGT
 
@@ -317,21 +321,22 @@ def pcr():
         result_text += ann.report().strip()
 
     elif 1 <= len(products) <= cutoff_detailed_figure:
-        result_text += f"{ann.report()}\n\n---\n"
+        result_text += f"{ann.report()}\n---\n"
 
         for amplicon in products:
             result_text += dedent(
-                f"""
+                f"""\
 Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
 
 {amplicon.figure()}
 
-Taq DNA polymerase
+Taq DNA pol
 {amplicon.program()}
+DNA pol w DNA binding domain (PHUSION)
+{amplicon.dbd_program()}
 
 >{amplicon.name}
 {amplicon.seq}
-
 ---
 """
             )
@@ -364,20 +369,13 @@ def primerdesign():
         amplicon = primer_design(template, limit=homology_limit)  # TODO Tm_NN
 
         if amplicon:
-            result_text += f"""
+            result_text += f"""\
 >{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
 {amplicon.forward_primer.seq}
 >{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
 {amplicon.reverse_primer.seq}
 >{amplicon.template.name}
 {amplicon.template.seq}
-
-Taq DNA polymerase
-{amplicon.program()}
-
->{amplicon.name}
-{amplicon.seq}
-
 ---
 """
 
@@ -426,9 +424,6 @@ def matchingprimer():
 {amplicon.template.seq}
 
 {amplicon.figure()}
-
-Taq DNA polymerase
-{amplicon.program()}
 
 >{amplicon.name}
 {amplicon.seq}
@@ -487,12 +482,14 @@ def asmdesign():
     for item in fragments:
         if hasattr(item, "template"):
             result_items.append(
-                (
-                    f"{item.forward_primer.format('fasta')}"
-                    f"{item.forward_primer.format('fasta')}"
-                    f"{item.template.format('fasta')}\n"
-                    f"{item.format('fasta')}"
-                )
+                (f"""\
+>{item.forward_primer.name} {len(item.forward_primer)}-mer
+{item.forward_primer.seq}
+>{item.reverse_primer.name} {len(item.reverse_primer)}-mer
+{item.reverse_primer.seq}
+>{item.template.name}
+{item.template.seq}
+""")
             )
         else:
             result_items.append(item.format("fasta"))
@@ -520,8 +517,20 @@ def assembly():
     else:
         candidates = asm.assemble_linear()
 
-    assembly_results = "\n".join(
-        f"{candidate.figure()}\n\n" f"{candidate.format('fasta')}"
+    assembly_results = "\n".join(f"""\
+Figure:
+
+{candidate.figure()}
+
+Detailed figure:
+
+{candidate.detailed_figure()}
+
+Resulting sequence:
+
+>{candidate.name} { {False:'linear',True:'circular'}[candidate.circular] }
+{candidate.seq}
+---"""
         for candidate in candidates
     )
 
@@ -543,11 +552,11 @@ def tm():
     primers = parse(user_data["primer_text"])
 
     tm_results = f"Biopython v{default['Biopython_version']} "
-    tm_results += f"Algorithm: {default['func']}\nArguments: "
+    tm_results += f"{default['func']} Arguments("
     tm_results += ", ".join(
         f"{k}: {user_data[k]}" for k in default.keys() if k in user_data.keys()
     )
-    tm_results += "\n\n"
+    tm_results += ")\n\n"
 
     for primer in primers:
         tm = tm_default(
