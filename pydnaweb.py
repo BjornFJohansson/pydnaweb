@@ -146,7 +146,7 @@ class WebPCRForm(FlaskForm):
 
     limit = IntegerField("limit", default=16)
 
-    send = SubmitField("calculate")
+    send = SubmitField("submit")
 
 
 class DigestForm(FlaskForm):
@@ -154,7 +154,7 @@ class DigestForm(FlaskForm):
 
     default = dedent(
         """\
->pUCmu 1669bp
+>pUCmu 1669bp circular
 ACGCGTCGCGAGGCCATATGGGTTAACCCATGGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAGGATCCCGGGTACCGAGCTCGAATTCGGATATCCTCGAGACTAGTGGGCCCGTTTAAACACATGTGTTTTTCCATAGGCTCCGCCCCCCTGACGAGCATCACAAAAATCGACGCTCAAGTCAGAGGTGGCGAAACCCGACAGGACTATAAAGATACCAGGCGTTTCCCCCTGGAAGCTCCCTCGTGCGCTCTCCTGTTCCGACCCTGCCGCTTACCGGATACCTGTCCGCCTTTCTCCCTTCGGGAAGCGTGGCGCTTTCTCATAGCTCACGCTGTAGGTATCTCAGTTCGGTGTAGGTCGTTCGCTCCAAGCTGGGCTGTGTGCACGAACCCCCCGTTCAGCCCGACCGCTGCGCCTTATCCGGTAACTATCGTCTTGAGTCCAACCCGGTAAGACACGACTTATCGCCACTGGCAGCAGCCACTGGTAACAGGATTAGCAGAGCGAGGTATGTAGGCGGTGCTACAGAGTTCTTGAAGTGGTGGCCTAACTACGGCTACACTAGAAGAACAGTATTTGGTATCTGCGCTCTGCTGAAGCCAGTTACCTTCGGAAAAAGAGTTGGTAGCTCTTGATCCGGCAAACAAACCACCGCTGGTAGCGGTGGTTTTTTTGTTTGCAAGCAGCAGATTACGCGCAGAAAAAAAGGATCTCAAGAAGATCCTTTGATCTTTTCTACTACCAATGCTTAATCAGTGAGGCACCTATCTCAGCGATCTGTCTATTTCGTTCATCCATAGTTGCCTGACTCCCCGTCGTGTAGATAACTACGATACGGGAGGGCTTACCATCTGGCCCCAGTGCTGCAATGATACCGCGAGACCCACGCTCACCGGCTCCAGATTTATCAGCAATAAACCAGCCAGCCGGAAGGGCCGAGCGCAGAAGTGGTCCTGCAACTTTATCCGCCTCCATCCAGTCTATTAATTGTTGCCGGGAAGCTAGAGTAAGTAGTTCGCCAGTTAATAGTTTGCGCAACGTTGTTGCCATTGCTACAGGCATCGTGGTGTCACGCTCGTCGTTTGGTATGGCTTCATTCAGCTCCGGTTCCCAACGATCAAGGCGAGTTACATGATCCCCCATGTTGTGCAAAAAAGCGGTTAGCTCCTTCGGTCCTCCGATCGTTGTCAGAAGTAAGTTGGCCGCAGTGTTATCACTCATGGTTATGGCAGCACTGCATAATTCTCCTACTGTCATGCCATCCGTAAGATGCTTTTCTGTGACTGGTGAGTACTCAACCAAGTCATTCTGAGAATAGTGTATGCGGCGACCGAGTTGCTCTTGCCCGGCGTCAATACGGGATAATACCGCGCCACATAGCAGAACTTTAAAAGTGCTCATCATTGGAAAACGTTCTTCGGGGCGAAAACTCTCAAGGATCTTACCGCTGTTGAGATCCAGTTCGATGTAACCCACTCGTGCACCCAACTGATCTTCAGCATCTTTTACTTTCACCAGCGTTTCTGGGTGAGCAAAAACAGGAAGGCAAAATGCCGCAAAAAAGGGAATAAGGGCGACACGGAAATGTTGAATACTCATACTCTTCCTTTTTCAATATTATTGAAGCATTTATCAGGGTTATTGTCTCATGAGCGGATACATA
 """
     )
@@ -172,8 +172,7 @@ ACGCGTCGCGAGGCCATATGGGTTAACCCATGGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAGGATCCCGGGTACCG
     sequence = TextAreaField("sequence", default=default)
     given_enzymes = TextAreaField("enzymes")
 
-    send = SubmitField("calculate", render_kw={"class": "btn btn-success"})
-    clear = SubmitField("clear", render_kw={"class": "btn btn-danger"})
+    send = SubmitField("submit")
 
 
 class TmForm(FlaskForm):
@@ -195,7 +194,7 @@ class TmForm(FlaskForm):
         "primer_text",
         default=">MyPrimer\nATGGCAGTTGAGAAGA\n\n>another\nagtgtgctagtagtacgtcgta",
     )
-    send = SubmitField("calculate")
+    send = SubmitField("submit")
     clear = SubmitField("clear")
 
 
@@ -223,7 +222,7 @@ class PrimerDesignForm(FlaskForm):
     )
     sequences = TextAreaField("sequences", default=default)
 
-    send = SubmitField("calculate")
+    send = SubmitField("submit")
     clear = SubmitField("clear")
 
 
@@ -245,7 +244,7 @@ class MatchingPrimerForm(FlaskForm):
     )
     sequences = TextAreaField("sequences", default=default)
 
-    send = SubmitField("calculate")
+    send = SubmitField("submit")
     clear = SubmitField("clear")
 
 
@@ -295,7 +294,7 @@ class AssemblyDesignForm(FlaskForm):
     )
 
     sequences = TextAreaField("sequences", default=default)
-    send = SubmitField("calculate")
+    send = SubmitField("submit")
     clear = SubmitField("clear")
 
 
@@ -323,7 +322,7 @@ class AssemblyForm(FlaskForm):
     )
 
     sequences = TextAreaField("sequences", default=default)
-    send = SubmitField("calculate")
+    send = SubmitField("submit")
     clear = SubmitField("clear")
 
 
@@ -395,37 +394,48 @@ def digest():
 
     if inserts:
         bb_once_cutters = backbone.once_cutters(enzymes)
-        i_no_cutters = RestrictionBatch().union(
+
+        i_no_cutters = RestrictionBatch.intersection(
             *[i.no_cutters(enzymes) for i in inserts]
         )
-        i_once_cutters = RestrictionBatch().union(
+        i_once_cutters = RestrictionBatch.intersection(
             *[i.once_cutters(enzymes) for i in inserts]
         )
-        i_twice_cutters = RestrictionBatch().union(
+        i_twice_cutters = RestrictionBatch.intersection(
             *[i.twice_cutters(enzymes) for i in inserts]
         )
+
+        # print(bb_once_cutters, i_no_cutters)
+        # print([i.no_cutters(enzymes) for i in inserts])
+        # print(RestrictionBatch().intersection(*[i.no_cutters(enzymes) for i in inserts]))
 
         result_text = f"""\
 Restriction analysis of {len(inserts)+1} sequences
 --------------------------------------------------
 The following enzymes cut once in the last sequence and absent from all preceding sequences(s):
-{" ".join(str(e) for e in sorted(bb_once_cutters&i_no_cutters))}
+{" ".join(str(e) for e in sorted(bb_once_cutters&i_no_cutters)) or '-'}
 
 The following enzymes cut once in the last sequence and twice in all preceding sequences(s):
-{" ".join(str(e) for e in sorted(bb_once_cutters&i_twice_cutters))}
+{" ".join(str(e) for e in sorted(bb_once_cutters&i_twice_cutters)) or '-'}
 
 The following enzymes cut once in each sequence:
-{" ".join(str(e) for e in sorted(bb_once_cutters&i_once_cutters))}
+{" ".join(str(e) for e in sorted(bb_once_cutters&i_once_cutters)) or '-'}
 
 All enzymes used in the analysis:
 {" ".join(str(e) for e in sorted(enzymes))}
 """
     else:
+        frags = backbone.cut(enzymes)
+        for i, f in enumerate(frags):
+            f.id = f"fragment#{i+1}"
+            f.description = f"{len(f)} bp"
+
         result_text = f"""\
 Restriction analysis of a single sequence
 -----------------------------------------
 
-{(chr(10)*2).join(f.format('fasta') for f in backbone.cut(enzymes)) or '-'}
+{(chr(10)*2).join(f.format('fasta') for f in frags) or '-'}
+
 
 The following enzymes do *not* cut:
 {" ".join(str(e) for e in sorted(backbone.no_cutters(enzymes))) or '-'}
