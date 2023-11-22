@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <title>Restriction Digestion</title>
+    </head>
+    <body>
+        <nav class="navbar navbar-inverse">
+          <div class="container">
+            <div class="navbar-header"><h1 class="display-1">Restriction Digestion</h1></div>
+          </div>
+        </nav>
+        <div class="container">
+           <pre id="OutPut">{{result}}</pre>
+
+                <form action="{{ url_for('digest') }}" method="POST">
+                    <table class="table-bordered">
+                    <tbody>
+                      <tr>
+                        <td>{{ form.allenzymesfield.label() }}</td>
+                        <td>{{ form.commonlyfield.label() }}</td>
+                        <td>{{ form.morethansixcuttersfield.label() }}</td>
+                        <td>{{ form.sixcuttersfield.label() }}</td>
+                        <td>{{ form.lessthansixcuttersfield.label() }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ form.allenzymesfield() }}</td>
+                        <td>{{ form.commonlyfield() }}</td>
+                        <td>{{ form.morethansixcuttersfield() }}</td>
+                        <td>{{ form.sixcuttersfield() }}</td>
+                        <td>{{ form.lessthansixcuttersfield() }}</td>
+                      </tr>
+                      <tr>
+                        <td colspan=4>Sequence(s) in FASTA or GenBank format separated by a blank line.</td>
+                        <td>Custom enzymes</td>
+                      </tr>
+                      <tr>
+                        <td colspan=4>{{form.sequence(cols="100", rows="20")|safe}}</td>
+                        <td>{{form.given_enzymes(cols="15", rows="20")|safe}}</td>
+                      </tr>
+                    </tbody>
+                    </table>
+
+                    <a href="{{url_for('index')}}" class="btn btn-primary">home</a>
+				    {{form.send(class="btn btn-success")}}
+				    {{ form.WTF_CSRF_SECRET_KEY }}
+                    <a href="{{url_for('digest')}}" class="btn btn-danger">clear</a>
+                    <a href="{{url_for('docs')}}" class="btn btn-info">documentation</a>
+                </form>
+        </div>
+    </body>
+</html>

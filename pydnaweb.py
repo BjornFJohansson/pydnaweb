@@ -1,8 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""docstring."""
+"""docstring.
+
+
+>65bp_PCR_prod
+CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTACGATTTCCTTTTGGAT
+
+>b
+GATTTCCTTTTGGATACCTGAAACAAAGCCCATCGTGGTCCTTAGACTT
+
+
+
+65bp_PCR_prod|15
+              \/
+              /\
+              15|b
+
+Detailed figure:
+
+CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTACGATTTCCTTTTGGAT
+                                                  GATTTCCTTTTGGAT
+                                                  GATTTCCTTTTGGATACCTGAAACAAAGCCCATCGTGGTCCTTAGACTT
+
+
+
+"""
+
 
 import datetime
+from itertools import chain
 from textwrap import dedent
 
 from flask_wtf import FlaskForm
@@ -14,6 +40,7 @@ from flask import request
 from werkzeug.datastructures import MultiDict
 
 from wtforms.fields import SelectField
+from wtforms.fields import SelectMultipleField
 from wtforms.fields import DecimalField
 from wtforms.fields import TextAreaField
 from wtforms.fields import StringField
@@ -24,7 +51,8 @@ from wtforms.fields import IntegerField
 from Bio.SeqUtils import MeltingTemp as _mt
 from Bio.SeqUtils.MeltingTemp import Tm_NN
 from Bio import __version__ as bpversion
-
+from Bio.Restriction import AllEnzymes, CommOnly
+from Bio.Restriction import RestrictionBatch
 
 from pydna import __version__ as version
 from pydna.parsers import parse
@@ -35,7 +63,13 @@ from pydna.design import assembly_fragments
 from pydna.design import circular_assembly_fragments
 from pydna.assembly import Assembly
 from pydna.tm import tm_default
-from pydna.primer import Primer
+
+
+allenzymes = sorted(AllEnzymes, key=str)
+commonly = sorted(CommOnly, key=str)
+sixcutters = [e for e in commonly if e.size == 6]
+morethansixcutters = [e for e in commonly if e.size > 6]
+lessthansixcutters = [e for e in commonly if e.size < 6]
 
 
 default = {
@@ -113,6 +147,33 @@ class WebPCRForm(FlaskForm):
     limit = IntegerField("limit", default=16)
 
     send = SubmitField("calculate")
+
+
+class DigestForm(FlaskForm):
+    """docstring."""
+
+    default = dedent(
+        """\
+>pUCmu 1669bp
+ACGCGTCGCGAGGCCATATGGGTTAACCCATGGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAGGATCCCGGGTACCGAGCTCGAATTCGGATATCCTCGAGACTAGTGGGCCCGTTTAAACACATGTGTTTTTCCATAGGCTCCGCCCCCCTGACGAGCATCACAAAAATCGACGCTCAAGTCAGAGGTGGCGAAACCCGACAGGACTATAAAGATACCAGGCGTTTCCCCCTGGAAGCTCCCTCGTGCGCTCTCCTGTTCCGACCCTGCCGCTTACCGGATACCTGTCCGCCTTTCTCCCTTCGGGAAGCGTGGCGCTTTCTCATAGCTCACGCTGTAGGTATCTCAGTTCGGTGTAGGTCGTTCGCTCCAAGCTGGGCTGTGTGCACGAACCCCCCGTTCAGCCCGACCGCTGCGCCTTATCCGGTAACTATCGTCTTGAGTCCAACCCGGTAAGACACGACTTATCGCCACTGGCAGCAGCCACTGGTAACAGGATTAGCAGAGCGAGGTATGTAGGCGGTGCTACAGAGTTCTTGAAGTGGTGGCCTAACTACGGCTACACTAGAAGAACAGTATTTGGTATCTGCGCTCTGCTGAAGCCAGTTACCTTCGGAAAAAGAGTTGGTAGCTCTTGATCCGGCAAACAAACCACCGCTGGTAGCGGTGGTTTTTTTGTTTGCAAGCAGCAGATTACGCGCAGAAAAAAAGGATCTCAAGAAGATCCTTTGATCTTTTCTACTACCAATGCTTAATCAGTGAGGCACCTATCTCAGCGATCTGTCTATTTCGTTCATCCATAGTTGCCTGACTCCCCGTCGTGTAGATAACTACGATACGGGAGGGCTTACCATCTGGCCCCAGTGCTGCAATGATACCGCGAGACCCACGCTCACCGGCTCCAGATTTATCAGCAATAAACCAGCCAGCCGGAAGGGCCGAGCGCAGAAGTGGTCCTGCAACTTTATCCGCCTCCATCCAGTCTATTAATTGTTGCCGGGAAGCTAGAGTAAGTAGTTCGCCAGTTAATAGTTTGCGCAACGTTGTTGCCATTGCTACAGGCATCGTGGTGTCACGCTCGTCGTTTGGTATGGCTTCATTCAGCTCCGGTTCCCAACGATCAAGGCGAGTTACATGATCCCCCATGTTGTGCAAAAAAGCGGTTAGCTCCTTCGGTCCTCCGATCGTTGTCAGAAGTAAGTTGGCCGCAGTGTTATCACTCATGGTTATGGCAGCACTGCATAATTCTCCTACTGTCATGCCATCCGTAAGATGCTTTTCTGTGACTGGTGAGTACTCAACCAAGTCATTCTGAGAATAGTGTATGCGGCGACCGAGTTGCTCTTGCCCGGCGTCAATACGGGATAATACCGCGCCACATAGCAGAACTTTAAAAGTGCTCATCATTGGAAAACGTTCTTCGGGGCGAAAACTCTCAAGGATCTTACCGCTGTTGAGATCCAGTTCGATGTAACCCACTCGTGCACCCAACTGATCTTCAGCATCTTTTACTTTCACCAGCGTTTCTGGGTGAGCAAAAACAGGAAGGCAAAATGCCGCAAAAAAGGGAATAAGGGCGACACGGAAATGTTGAATACTCATACTCTTCCTTTTTCAATATTATTGAAGCATTTATCAGGGTTATTGTCTCATGAGCGGATACATA
+"""
+    )
+
+    allenzymesfield = SelectMultipleField("AllEnzymes", choices=allenzymes)
+    commonlyfield = SelectMultipleField("CommOnly", choices=commonly)
+    sixcuttersfield = SelectMultipleField("Sixcutters", choices=sixcutters)
+    morethansixcuttersfield = SelectMultipleField(
+        ">Sixcutters", choices=morethansixcutters
+    )
+    lessthansixcuttersfield = SelectMultipleField(
+        "<Sixcutters", choices=lessthansixcutters
+    )
+
+    sequence = TextAreaField("sequence", default=default)
+    given_enzymes = TextAreaField("enzymes")
+
+    send = SubmitField("calculate", render_kw={"class": "btn btn-success"})
+    clear = SubmitField("clear", render_kw={"class": "btn btn-danger"})
 
 
 class TmForm(FlaskForm):
@@ -287,6 +348,106 @@ def index():
 def docs():
     """docstring."""
     return render_template("docs.html")
+
+
+@app.route("/digest", methods=["GET", "POST"])
+def digest():
+    """docstring."""
+    user_data = request.form or MultiDict()
+
+    form = DigestForm(formdata=MultiDict(user_data))
+
+    s = user_data.get("sequence")
+
+    result_text = "digestion result "
+
+    enzymes = RestrictionBatch(
+        list(
+            chain.from_iterable(
+                user_data.getlist(x)
+                for x in (
+                    "allenzymesfield",
+                    "commonlyfield",
+                    "morethansixcuttersfield",
+                    "sixcuttersfield",
+                    "lessthansixcuttersfield",
+                )
+            )
+        )
+    )
+
+    custom_enzymes = RestrictionBatch(
+        [
+            e
+            for e in AllEnzymes
+            if str(e).lower() in str(user_data.get("given_enzymes")).lower()
+        ]
+    )
+
+    enzymes.update(custom_enzymes)
+
+    if not s or not enzymes:
+        return render_template("digest.html", form=form)
+
+    sequences = parse(s)
+
+    *inserts, backbone = sequences
+
+    if inserts:
+        bb_once_cutters = backbone.once_cutters(enzymes)
+        i_no_cutters = RestrictionBatch().union(
+            *[i.no_cutters(enzymes) for i in inserts]
+        )
+        i_once_cutters = RestrictionBatch().union(
+            *[i.once_cutters(enzymes) for i in inserts]
+        )
+        i_twice_cutters = RestrictionBatch().union(
+            *[i.twice_cutters(enzymes) for i in inserts]
+        )
+
+        result_text = f"""\
+Restriction analysis of {len(inserts)+1} sequences
+--------------------------------------------------
+The following enzymes cut once in the last sequence and absent from all preceding sequences(s):
+{" ".join(str(e) for e in sorted(bb_once_cutters&i_no_cutters))}
+
+The following enzymes cut once in the last sequence and twice in all preceding sequences(s):
+{" ".join(str(e) for e in sorted(bb_once_cutters&i_twice_cutters))}
+
+The following enzymes cut once in each sequence:
+{" ".join(str(e) for e in sorted(bb_once_cutters&i_once_cutters))}
+
+All enzymes used in the analysis:
+{" ".join(str(e) for e in sorted(enzymes))}
+"""
+    else:
+        result_text = f"""\
+Restriction analysis of a single sequence
+-----------------------------------------
+
+{(chr(10)*2).join(f.format('fasta') for f in backbone.cut(enzymes)) or '-'}
+
+The following enzymes do *not* cut:
+{" ".join(str(e) for e in sorted(backbone.no_cutters(enzymes))) or '-'}
+
+The following enzymes cut once:
+{" ".join(str(e) for e in sorted(backbone.once_cutters(enzymes))) or '-'}
+
+The following enzymes cut twice:
+{" ".join(str(e) for e in sorted(backbone.twice_cutters(enzymes))) or '-'}
+
+The following enzymes cut three times:
+{" ".join(str(e) for e in sorted(backbone.n_cutters(3, enzymes))) or '-'}
+
+The following enzymes cut one or more times:
+{" ".join(str(e) for e in sorted(backbone.cutters(enzymes))) or '-'}
+
+All enzymes used in the analysis:
+{" ".join(str(e) for e in sorted(enzymes))}
+
+"""
+
+    return render_template("result.html", result=result_text)
 
 
 @app.route("/pcr", methods=["GET", "POST"])
@@ -482,14 +643,16 @@ def asmdesign():
     for item in fragments:
         if hasattr(item, "template"):
             result_items.append(
-                (f"""\
+                (
+                    f"""\
 >{item.forward_primer.name} {len(item.forward_primer)}-mer
 {item.forward_primer.seq}
 >{item.reverse_primer.name} {len(item.reverse_primer)}-mer
 {item.reverse_primer.seq}
 >{item.template.name}
 {item.template.seq}
-""")
+"""
+                )
             )
         else:
             result_items.append(item.format("fasta"))
@@ -517,7 +680,8 @@ def assembly():
     else:
         candidates = asm.assemble_linear()
 
-    assembly_results = "\n".join(f"""\
+    assembly_results = "\n".join(
+        f"""\
 Figure:
 
 {candidate.figure()}
