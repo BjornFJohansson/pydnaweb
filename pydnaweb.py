@@ -28,8 +28,10 @@ CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTACGATTTCCTTTTGGAT
 
 
 import datetime
+import re
 from itertools import chain
 from textwrap import dedent
+
 
 from flask_wtf import FlaskForm
 
@@ -63,6 +65,7 @@ from pydna.design import assembly_fragments
 from pydna.design import circular_assembly_fragments
 from pydna.assembly import Assembly
 from pydna.tm import tm_default
+from pydna.genbankfixer import gbtext_clean
 
 
 allenzymes = sorted(AllEnzymes, key=str)
@@ -145,6 +148,129 @@ class WebPCRForm(FlaskForm):
     sequences = TextAreaField("primer_text", default=default)
 
     limit = IntegerField("limit", default=16)
+
+    send = SubmitField("submit")
+
+
+class RepairForm(FlaskForm):
+    """docstring."""
+
+    default = dedent(
+        """\
+        LOCUS       mysequence   8 bp    DNA     linear   UNK 01-JAN-1980
+        DEFINITION  DEFINITION
+        ACCESSION   ACCESSION
+        VERSION     VERSION
+        KEYWORDS    KEYWORDS
+        SOURCE      SOURCE
+          ORGANISM  ORGANISM
+        COMMENT     This file is malformed. Can not be read by Bio.SeqIO.read()
+        COMMENT     https://biopython.org/docs/latest/api/Bio.SeqIO.html#input-single-records
+        COMMENT     All fields but LOCUS and FEATURES are removed.
+        FEATURES             Location/Qualifiers
+             misc_feature    3..6
+                             /locus_tag="NewFeature"
+                             /label="NewFeature"
+                             /ApEinfo_label="NewFeature"
+                             /ApEinfo_fwdcolor="cyan"
+                             /ApEinfo_revcolor="green"
+                             /ApEinfo_graphicformat="arrow_data {{0 0.5 0 1 2 0 0 -1 0
+                             -0.5} {} 0} width 5 offset 0"
+        ORIGIN   1 gatacgta  //
+
+    """
+    )
+
+    sequence = TextAreaField("gbsequence", default=default)
+
+    send = SubmitField("submit")
+
+
+class ToggleForm(FlaskForm):
+    """docstring."""
+
+    default = dedent(
+        """\
+        >myfastasequence
+        acgtctaggtcatttgctgatc
+
+        LOCUS       seq_8bp                    8 bp    DNA     linear   UNK 01-JAN-1980
+        DEFINITION  seq_8bp.
+        ACCESSION   seq_8bp
+        VERSION     seq_8bp
+        KEYWORDS    .
+        SOURCE      .
+          ORGANISM  .
+                    .
+        FEATURES             Location/Qualifiers
+        ORIGIN
+                1 gatacgta
+        //
+
+    """
+    )
+
+    sequence = TextAreaField("sequences", default=default)
+
+    send = SubmitField("submit")
+
+
+class ToTABForm(FlaskForm):
+    """docstring."""
+
+    default = dedent(
+        """\
+        >5_5NUC1clon(N)
+        GATAGATCTAGACTAGTCAAATGTGCAGTAGGATACTCTTG
+
+        >4_3CCP1clon
+        CGATGTCGACTTAGATCTCTAAACCTTGTTCCTCT
+
+        >3_5CCP1clon
+        GATCGGCCGGATCCAAATGACTACTGCTGTTAGGC
+
+        >2_3CYC1clon
+        CGATGTCGACTTAGATCTCACAGGCTTTTTTCAAG
+
+        >1_5CYC1clone
+        GATCGGCCGGATCCAAATGACTGAATTCAAGGCCG
+
+        >0_S1 67bp primer for amplification of GFP from pFA6a-GFPS65T-kanMX6. The last 21 bp are specific for the GFP gene in pFA6a-GFPS65T-kanMX6. The rest is homology with the 3'part of ScJEN1. This primer was used for tagging the JEN1 with GFP on the chromosome.
+        GATTCGAACGTCTCAAAGACATATGAGGAGCATATTGAGACCGTTAGTAAAGGAGAAGAACTTTTC
+
+        """
+    )
+
+    sequences = TextAreaField("sequences", default=default)
+
+    send = SubmitField("submit")
+
+
+class EnumForm(FlaskForm):
+    """docstring."""
+
+    default = dedent(
+        """\
+        >3CCP1clon
+        CGATGTCGACTTAGATCTCTAAACCTTGTTCCTCT
+
+        >5CCP1clon
+        GATCGGCCGGATCCAAATGACTACTGCTGTTAGGC
+
+        >3CYC1clon
+        CGATGTCGACTTAGATCTCACAGGCTTTTTTCAAG
+
+        >5CYC1clone
+        GATCGGCCGGATCCAAATGACTGAATTCAAGGCCG
+
+        >S1 67bp primer for amplification of GFP from pFA6a-GFPS65T-kanMX6. The last 21 bp are specific for the GFP gene in pFA6a-GFPS65T-kanMX6. The rest is homology with the 3'part of ScJEN1. This primer was used for tagging the JEN1 with GFP on the chromosome.
+        GATTCGAACGTCTCAAAGACATATGAGGAGCATATTGAGACCGTTAGTAAAGGAGAAGAACTTTTC
+
+        """
+    )
+
+    startnumber = StringField("startnumber", default=1)
+    sequences = TextAreaField("sequences", default=default)
 
     send = SubmitField("submit")
 
@@ -460,10 +586,112 @@ All enzymes used in the analysis:
     return render_template("result.html", result=result_text)
 
 
+@app.route("/repair", methods=["GET", "POST"])
+def repair():
+    """docstring."""
+    user_data = request.form or MultiDict()
+
+    form = RepairForm(formdata=MultiDict(user_data))
+
+    s = user_data.get("sequence")
+
+    if not s:
+        return render_template("repair.html", form=form)
+
+    gbtext, json = gbtext_clean(s)
+
+    result_text = read(gbtext).format()
+
+    return render_template("result.html", result=result_text)
+
+
+@app.route("/toggle", methods=["GET", "POST"])
+def toggle():
+    """docstring."""
+    user_data = request.form or MultiDict()
+
+    form = ToggleForm(formdata=MultiDict(user_data))
+
+    s = user_data.get("sequence")
+
+    if not s:
+        return render_template("toggle.html", form=form)
+
+    pattern = (
+        r"(?:>.+\n^(?:^[^>]+?)(?=\n\n|>|LOCUS|ID))|(?:(?:LOCUS|ID)(?:(?:.|\n)+?)^//)"
+    )
+    result_text = ""
+    rawseqs = re.findall(pattern, dedent(s + "\n\n"), flags=re.MULTILINE)
+    if rawseqs:
+        for rawseq in rawseqs:
+            if rawseq.startswith(">"):
+                outformat = "gb"
+            else:
+                outformat = "fasta"
+            seq = read(rawseq)
+            result_text += seq.format(outformat) + "\n\n"
+    else:
+        outformat = "fasta"
+        chunk = "".join(c for c in s if c in "GATCRYWSMKHBVDNgatcrywsmkhbvdn")
+        result_text = f">seq_{len(chunk)}bp\n{chunk}"
+
+    return render_template("result.html", result=result_text)
+
+
+@app.route("/totab", methods=["GET", "POST"])
+def totab():
+    """docstring."""
+    user_data = request.form or MultiDict()
+
+    form = ToTABForm(formdata=MultiDict(user_data))
+
+    s = user_data.get("sequences")
+
+    if not s:
+        return render_template("totab.html", form=form)
+
+    result_text = ""
+
+    new_sequences = parse(s)
+
+    for seq in new_sequences:
+        result_text += seq.format("tab") + "\n"
+
+    return render_template("result.html", result=result_text)
+
+
+@app.route("/enum", methods=["GET", "POST"])
+def enum():
+    """docstring."""
+    user_data = request.form or MultiDict()
+
+    form = EnumForm(formdata=MultiDict(user_data))
+
+    s = user_data.get("sequences")
+
+    if not s:
+        return render_template("enum.html", form=form)
+
+    result_text = ""
+
+    from pydna.myprimers import PrimerList
+
+    try:
+        startnumber = int(user_data.get("startnumber"))
+    except ValueError:
+        startnumber = 1
+
+    pl = PrimerList([read(f">{startnumber-1}_fakeprimer\na")])
+
+    result_text += pl.assign_numbers(parse(s))
+
+    return render_template("result.html", result=result_text)
+
+
 @app.route("/pcr", methods=["GET", "POST"])
 def pcr():
     """docstring."""
-    user_data = request.form or {}
+    user_data = request.form or MultiDict()
 
     form = WebPCRForm(formdata=MultiDict(user_data))
 
@@ -522,7 +750,7 @@ DNA pol w DNA binding domain (PHUSION)
 def primerdesign():
     """docstring."""
 
-    user_data = request.form or {}
+    user_data = request.form or MultiDict()
 
     form = PrimerDesignForm(formdata=MultiDict(user_data))
 
@@ -557,7 +785,7 @@ def primerdesign():
 def matchingprimer():
     """docstring."""
 
-    user_data = request.form or {}
+    user_data = request.form or MultiDict()
 
     form = MatchingPrimerForm(formdata=MultiDict(user_data))
 
@@ -610,7 +838,7 @@ def matchingprimer():
 def asmdesign():
     """docstring."""
 
-    user_data = request.form or {}
+    user_data = request.form or MultiDict()
 
     form = AssemblyDesignForm(formdata=MultiDict(user_data))
 
@@ -620,6 +848,27 @@ def asmdesign():
     separator = user_data["separator"]
     items = user_data["sequences"].split(separator)
     sequences = []
+
+    #     item = """
+    # >f50 21-mer
+    # CTTTCGAGAATACCAGAAAAA
+
+    # >r50 21-mer
+    # GTACAAGAATTGCACAATTCA
+
+    # >a
+    # CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTAC"""
+
+    # item = """
+    # >b
+    # GATTTCCTTTTGGATACCTGAAACAAAGCCCATCGTGGTCCTTAGACTT
+
+    # """
+
+    # alg = circular_assembly_fragments
+    # user_data = {"topology":"circular",
+    #              "overlap":15,
+    #              "maxlink":5}
 
     for item in items:
         try:
@@ -631,7 +880,6 @@ def asmdesign():
                 pass
         else:
             ann = Anneal((fp, rp), tp, limit=12)  # TODO Tm_NN
-
             seq, *rest = ann.products
 
         sequences.append(seq)
@@ -665,7 +913,7 @@ def asmdesign():
                 )
             )
         else:
-            result_items.append(item.format("fasta"))
+            result_items.append(item.format("fasta-2line"))
 
     result_text = f"\n{separator}\n".join(result_items)
     return render_template("result.html", form=form, result=result_text)
@@ -676,7 +924,7 @@ def assembly():
     """docstring."""
     form = AssemblyForm()
 
-    user_data = request.form or {}
+    user_data = request.form or MultiDict()
 
     if request.method == "GET" or not user_data.get("sequences"):
         form.topology.data = user_data.get("topology", "linear")
@@ -716,7 +964,7 @@ Resulting sequence:
 def tm():
     """docstring."""
 
-    user_data = request.form or {}
+    user_data = request.form or MultiDict()
 
     form = TmForm(formdata=MultiDict(user_data))
 
@@ -755,7 +1003,7 @@ def tm():
         )
         primer.description = f"tm={round(tm, 3)}"
 
-    tm_results += "\n".join(p.format("fasta") for p in primers)
+    tm_results += "\n".join(p.format("fasta-2line") for p in primers)
 
     return render_template("result.html", form=form, result=tm_results)
 

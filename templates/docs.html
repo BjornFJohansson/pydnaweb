@@ -14,8 +14,9 @@ img { max-width: 100%; }
 </head>
 <body>
 <h1>Pydnaweb</h1>
-<p>Pydnaweb is a flask application that exposes some of the functionality of the <a href="https://github.com/BjornFJohansson/pydna#readme">pydna</a> Python package as an online service.</p>
-<p>Development of Pydna/Pydnaweb is led by <a href="">Björn Johansson</a> at the Department of Biology, University of Minho.</p>
+<p><a href="https://github.com/BjornFJohansson/PydnaWeb">Pydnaweb</a> is a flask application that exposes some of the functionality of the <a href="https://github.com/BjornFJohansson/pydna#readme">pydna</a> Python package as an online service.</p>
+<p>It can be hosted on <a href="https://www.pythonanywhere.com">pythonanywhere</a> for example.</p>
+<p>Development of Pydna&amp;Pydnaweb is led by <a href="">Björn Johansson</a> at the Department of Biology, University of Minho.</p>
 <p>If you have question not answered below or suggestions, please ask in the <a href="https://groups.google.com/g/pydna">Google group</a> (preferred)
 or create an issue on <a href="https://github.com/BjornFJohansson/pydnaweb/issues">GitHub</a>.</p>
 <p>All tools accept sequences in <a href="https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats">FASTA or Genbank</a> format. The formats can be mixed.</p>
@@ -112,7 +113,28 @@ data and a the <a href="https://biopython.org/docs/1.75/api/Bio.SeqUtils.Melting
 <p>For details on the decisions for the default values see <a href="https://github.com/BjornFJohansson/tm/blob/master/tm.ipynb">here</a>.</p>
 <p><a href="https://www.youtube.com/watch?v=NufigSvIfA4"><img alt="" src="/static/yt.png"></a></p>
 <h3>Primer designer</h3>
-<p>Designs primers for one or more sequences.</p>
+<p>Designs primers for one or more template sequences.
+Three sequences are returned for each input sequence, representing the
+two primers and the original sequence, followed by a suggested PCR program.</p>
+<pre><code>
+&gt;f40 12-mer
+GTCCCCGAGGCG
+&gt;r40 19-mer
+CTTCTACAAAACCGCGTCA
+&gt;seq
+GTCCCCGAGGCGGACACTGATTGACGCGGTTTTGTAGAAG
+
+Taq DNA polymerase
+|95°C|95°C               |    |tmf:59.9
+|____|_____          72°C|72°C|tmr:59.8
+|3min|30s  \ 49.7°C _____|____|45s/kb
+|    |      \______/ 0:30|5min|GC 57%
+|    |       30s         |    |40bp
+
+&gt;40bp_PCR_prod
+GTCCCCGAGGCGGACACTGATTGACGCGGTTTTGTAGAAG
+
+</code></pre>
 <h3>Matching primer</h3>
 <h3>Assembly primer designer</h3>
 <h3>Assembly simulator</h3>

@@ -1,8 +1,10 @@
 # Pydnaweb
 
-Pydnaweb is a flask application that exposes some of the functionality of the [pydna](https://github.com/BjornFJohansson/pydna#readme) Python package as an online service.
+[Pydnaweb](https://github.com/BjornFJohansson/PydnaWeb) is a flask application that exposes some of the functionality of the [pydna](https://github.com/BjornFJohansson/pydna#readme) Python package as an online service.
 
-Development of Pydna/Pydnaweb is led by [Björn Johansson]() at the Department of Biology, University of Minho.
+It can be hosted on [pythonanywhere](https://www.pythonanywhere.com) for example.
+
+Development of Pydna&Pydnaweb is led by [Björn Johansson]() at the Department of Biology, University of Minho.
 
 If you have question not answered below or suggestions, please ask in the [Google group](https://groups.google.com/g/pydna) (preferred)
 or create an issue on [GitHub](https://github.com/BjornFJohansson/pydnaweb/issues).

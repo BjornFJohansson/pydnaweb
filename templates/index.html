@@ -14,7 +14,7 @@
 
     <body>
 
-    <table class="tg">
+    <table class="table table-hover table-responsive table-sm">
     <tbody>
       <tr>
        PydnaWeb powered by <a href="https://github.com/BjornFJohansson/pydna">pydna {{version}}</a> with Biopython {{bpversion}}
@@ -32,7 +32,7 @@
         <td class="tg-0pky">Design a primer to match an existing primer for a primer/template pair or list of such pairs.</td>
       </tr>
       <tr>
-        <td class="tg-0pky"><a href="{{url_for('asmdesign')}}" class="btn btn-primary btn-lg btn-block">Assembly primer designer</a></td>
+        <td class="tg-0pky"><a href="{{url_for('asmdesign')}}" class="btn btn-primary btn-lg btn-block">Assembly designer</a></td>
         <td class="tg-0pky">Design primers for linear or circular assembly of a list of amplicons or sequence fragments.</td>
       </tr>
       <tr>
@@ -48,20 +48,24 @@
         <td class="tg-0pky">Simulate restriction digestion.</td>
       </tr>
       <tr>
-        <td class="tg-0pky"><a href="{{url_for('index')}}" class="btn btn-primary btn-lg btn-block">Toggle format</a></td>
-        <td class="tg-0pky">Reformat sequences in GenBank or FASTA format. (Not implemented yet 🚧)</td>
+        <td class="tg-0pky"><a href="{{url_for('toggle')}}" class="btn btn-primary btn-lg btn-block">Toggle format</a></td>
+        <td class="tg-0pky">Reformat sequences in GenBank or FASTA format.</td>
       </tr>
       <tr>
-        <td class="tg-0pky"><a href="{{url_for('index')}}" class="btn btn-primary btn-lg btn-block">Repair GenBank</a></td>
-        <td class="tg-0pky">Repair malformed GenBank files. (Not implemented yet 🚧)</td>
+        <td class="tg-0pky"><a href="{{url_for('repair')}}" class="btn btn-primary btn-lg btn-block">Repair GenBank</a></td>
+        <td class="tg-0pky">Repair malformed GenBank files.</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('index')}}" class="btn btn-primary btn-lg btn-block">SEGUID</a></td>
         <td class="tg-0pky">Calculate SEGUID checksums for protein or DNA sequences. (Not implemented yet 🚧)</td>
       </tr>
       <tr>
-        <td class="tg-0pky"><a href="{{url_for('index')}}" class="btn btn-primary btn-lg btn-block">Format primers</a></td>
-        <td class="tg-0pky">Format primer list and optionally assign numbers. (Not implemented yet 🚧)</td>
+        <td class="tg-0pky"><a href="{{url_for('enum')}}" class="btn btn-primary btn-lg btn-block">Primer enumerator</a></td>
+        <td class="tg-0pky">Assign numbers to primers in a list (FASTA or GenBank format). Nunmber will be prepended to identifier.</td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('totab')}}" class="btn btn-primary btn-lg btn-block">Format primer list in TAB format.</a></td>
+        <td class="tg-0pky">Format primer list in TAB format. Required for many companies selling oligonucleotides.</td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('docs')}}" class="btn btn-info btn-lg btn-block">Documentation</a></td>
@@ -69,11 +73,5 @@
       </tr>
     </tbody>
     </table>
-
-      <div>
-      <a href="https://www.pythonanywhere.com" class="btn btn-link">Pythonanywhere</a>
-      <a href="https://github.com/BjornFJohansson/PydnaWeb" class="btn btn-link">PydnaWeb on GitHub</a>
-      <a href="https://github.com/BjornFJohansson/pydna" class="btn btn-link">pydna on GitHub</a>
-      </div>
     </body>
 </html>
