@@ -48,6 +48,10 @@
         <td class="tg-0pky">Simulate restriction digestion.</td>
       </tr>
       <tr>
+        <td class="tg-0pky"><a href="{{url_for('crispr')}}" class="btn btn-primary btn-lg btn-block">CRISPr simulator</a></td>
+        <td class="tg-0pky">Simulate CRISPr digestion.</td>
+      </tr>
+      <tr>
         <td class="tg-0pky"><a href="{{url_for('toggle')}}" class="btn btn-primary btn-lg btn-block">Toggle format</a></td>
         <td class="tg-0pky">Reformat sequences in GenBank or FASTA format.</td>
       </tr>
@@ -57,14 +61,18 @@
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('index')}}" class="btn btn-primary btn-lg btn-block">SEGUID</a></td>
-        <td class="tg-0pky">Calculate SEGUID checksums for protein or DNA sequences. (Not implemented yet 🚧)</td>
+        <td class="tg-0pky"><p class="text-danger">Calculate SEGUID checksums for protein or DNA sequences. (Not implemented yet.)</p></td>
+      </tr>
+      <tr>
+        <td class="tg-0pky"><a href="{{url_for('index')}}" class="btn btn-primary btn-lg btn-block">Fusion PCR</a></td>
+        <td class="tg-0pky"><p class="text-danger">Simulate fusion PCR. (Not implemented yet.)</p></td>
       </tr>
       <tr>
         <td class="tg-0pky"><a href="{{url_for('enum')}}" class="btn btn-primary btn-lg btn-block">Primer enumerator</a></td>
         <td class="tg-0pky">Assign numbers to primers in a list (FASTA or GenBank format). Nunmber will be prepended to identifier.</td>
       </tr>
       <tr>
-        <td class="tg-0pky"><a href="{{url_for('totab')}}" class="btn btn-primary btn-lg btn-block">Format primer list in TAB format.</a></td>
+        <td class="tg-0pky"><a href="{{url_for('totab')}}" class="btn btn-primary btn-lg btn-block">Format primer list in TAB format</a></td>
         <td class="tg-0pky">Format primer list in TAB format. Required for many companies selling oligonucleotides.</td>
       </tr>
       <tr>

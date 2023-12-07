@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from threading import Thread
 
 import PyQt5.QtCore as core
@@ -22,9 +23,7 @@ class WebUI(object):
         app_name=None,
     ):
         self.flask_app = app
-        self.flask_thread = Thread(
-            target=self._run_flask, args=(url, port, debug, using_win32)
-        )
+        self.flask_thread = Thread(target=self._run_flask, args=(url, port, debug, using_win32))
         self.flask_thread.daemon = True
         self.debug = debug
 

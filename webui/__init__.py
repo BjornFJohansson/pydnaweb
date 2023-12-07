@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """WebUI lets you create first class desktop applications in Python with HTML/CSS"""
 from .webui import *
 

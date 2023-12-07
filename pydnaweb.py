@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""docstring.
+r"""docstring.
 
 
 >65bp_PCR_prod
@@ -27,7 +27,7 @@ CTTTCGAGAATACCAGAAAAAATGATTACTGAATTGTGCAATTCTTGTACGATTTCCTTTTGGAT
 """
 
 
-import datetime
+# import datetime
 import re
 from itertools import chain
 from textwrap import dedent
@@ -41,6 +41,7 @@ from flask import request
 
 from werkzeug.datastructures import MultiDict
 
+# from wtforms import widgets
 from wtforms.fields import SelectField
 from wtforms.fields import SelectMultipleField
 from wtforms.fields import DecimalField
@@ -58,7 +59,10 @@ from Bio.Restriction import RestrictionBatch
 
 from pydna import __version__ as version
 from pydna.parsers import parse
+from pydna.parsers import parse_primers
 from pydna.readers import read
+from pydna.readers import read_primer
+from pydna.myprimers import PrimerList
 from pydna.amplify import Anneal
 from pydna.design import primer_design
 from pydna.design import assembly_fragments
@@ -96,8 +100,7 @@ nn_tableoptions = [
     (3, "DNA_NN3 - Allawi and SantaLucia (1997)," " Biochemistry 36: 10581-10594"),
     (
         4,
-        "DNA_NN4 - SantaLucia & Hicks (2004),"
-        " Annu. Rev. Biophys. Biomol. Struct 33: 415-440",
+        "DNA_NN4 - SantaLucia & Hicks (2004)," " Annu. Rev. Biophys. Biomol. Struct 33: 415-440",
     ),
 ]
 
@@ -106,14 +109,12 @@ saltoptions = [
     (1, "1. 16.6 x log[Na+] (Schildkraut & Lifson" " (1965), Biopolymers 3: 195-208)"),
     (
         2,
-        "2. 16.6 x log([Na+]/(1.0 + 0.7*[Na+])) (Wetmur"
-        " (1991), Crit Rev Biochem Mol Biol 126: 227-259)",
+        "2. 16.6 x log([Na+]/(1.0 + 0.7*[Na+])) (Wetmur" " (1991), Crit Rev Biochem Mol Biol 126: 227-259)",
     ),
     (3, "3. 12.5 x log(Na+] (SantaLucia et al. (1996)," " Biochemistry 35: 3555-3562"),
     (
         4,
-        "4. 11.7 x log[Na+] (SantaLucia (1998),"
-        " Proc Natl Acad Sci USA 95: 1460-1465",
+        "4. 11.7 x log[Na+] (SantaLucia (1998)," " Proc Natl Acad Sci USA 95: 1460-1465",
     ),
     (
         5,
@@ -126,6 +127,11 @@ saltoptions = [
         " (Owczarzy et al. (2004), Biochemistry 43: 3537-3554)",
     ),
     (7, "7. Complex formula with decision tree and" " 7 empirical constants."),
+]
+
+
+crispr_systems = [
+    ("cas9", "cas9 system"),
 ]
 
 
@@ -235,7 +241,7 @@ class ToTABForm(FlaskForm):
         >1_5CYC1clone
         GATCGGCCGGATCCAAATGACTGAATTCAAGGCCG
 
-        >0_S1 67bp primer for amplification of GFP from pFA6a-GFPS65T-kanMX6. The last 21 bp are specific for the GFP gene in pFA6a-GFPS65T-kanMX6. The rest is homology with the 3'part of ScJEN1. This primer was used for tagging the JEN1 with GFP on the chromosome.
+        >0_S1 67bp primer for amplification of GFP from pFA6a-GFPS65T-kanMX6.
         GATTCGAACGTCTCAAAGACATATGAGGAGCATATTGAGACCGTTAGTAAAGGAGAAGAACTTTTC
 
         """
@@ -263,7 +269,7 @@ class EnumForm(FlaskForm):
         >5CYC1clone
         GATCGGCCGGATCCAAATGACTGAATTCAAGGCCG
 
-        >S1 67bp primer for amplification of GFP from pFA6a-GFPS65T-kanMX6. The last 21 bp are specific for the GFP gene in pFA6a-GFPS65T-kanMX6. The rest is homology with the 3'part of ScJEN1. This primer was used for tagging the JEN1 with GFP on the chromosome.
+        >S1 67bp primer for amplification of GFP from pFA6a-GFPS65T-kanMX6.
         GATTCGAACGTCTCAAAGACATATGAGGAGCATATTGAGACCGTTAGTAAAGGAGAAGAACTTTTC
 
         """
@@ -273,6 +279,14 @@ class EnumForm(FlaskForm):
     sequences = TextAreaField("sequences", default=default)
 
     send = SubmitField("submit")
+
+
+# class MultiCheckboxField(SelectMultipleField):
+#     widget = widgets.ListWidget(prefix_label=False)
+#     option_widget = widgets.CheckboxInput()
+
+
+MultiCheckboxField = SelectMultipleField
 
 
 class DigestForm(FlaskForm):
@@ -285,15 +299,11 @@ ACGCGTCGCGAGGCCATATGGGTTAACCCATGGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAGGATCCCGGGTACCG
 """
     )
 
-    allenzymesfield = SelectMultipleField("AllEnzymes", choices=allenzymes)
-    commonlyfield = SelectMultipleField("CommOnly", choices=commonly)
-    sixcuttersfield = SelectMultipleField("Sixcutters", choices=sixcutters)
-    morethansixcuttersfield = SelectMultipleField(
-        ">Sixcutters", choices=morethansixcutters
-    )
-    lessthansixcuttersfield = SelectMultipleField(
-        "<Sixcutters", choices=lessthansixcutters
-    )
+    allenzymesfield = MultiCheckboxField("AllEnzymes", choices=allenzymes)
+    commonlyfield = MultiCheckboxField("CommOnly", choices=commonly)
+    sixcuttersfield = MultiCheckboxField("Sixcutters", choices=sixcutters)
+    morethansixcuttersfield = MultiCheckboxField(">Sixcutters", choices=morethansixcutters)
+    lessthansixcuttersfield = MultiCheckboxField("<Sixcutters", choices=lessthansixcutters)
 
     sequence = TextAreaField("sequence", default=default)
     given_enzymes = TextAreaField("enzymes")
@@ -304,9 +314,7 @@ ACGCGTCGCGAGGCCATATGGGTTAACCCATGGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAGGATCCCGGGTACCG
 class TmForm(FlaskForm):
     """docstring."""
 
-    nn_table = SelectField(
-        "nn_table", choices=nn_tableoptions, default=default["nn_table"]
-    )
+    nn_table = SelectField("nn_table", choices=nn_tableoptions, default=default["nn_table"])
     saltcorr = SelectField("saltcorr", choices=saltoptions, default=default["saltcorr"])
     Na = DecimalField("Na", default=default["Na"])
     Mg = DecimalField("Mg", default=default["Mg"])
@@ -319,6 +327,22 @@ class TmForm(FlaskForm):
     primer_text = TextAreaField(
         "primer_text",
         default=">MyPrimer\nATGGCAGTTGAGAAGA\n\n>another\nagtgtgctagtagtacgtcgta",
+    )
+    send = SubmitField("submit")
+    clear = SubmitField("clear")
+
+
+class CrisprForm(FlaskForm):
+    """docstring."""
+
+    system = SelectField("system", choices=crispr_systems)
+    sgrna = TextAreaField(
+        "sgRNA construct",
+        default=">sgRNA_construct\nGTTACTTTACCCGACGTCCCgttttagagctagaaatagcaagttaaaataagg",
+    )
+    target = TextAreaField(
+        "Target DNA",
+        default=">Target_DNA\nGTTACTTTACCCGACGTCCCaGG",
     )
     send = SubmitField("submit")
     clear = SubmitField("clear")
@@ -456,9 +480,7 @@ nn_tables = {"1": _mt.DNA_NN1, "2": _mt.DNA_NN2, "3": _mt.DNA_NN3, "4": _mt.DNA_
 
 app = Flask(__name__)
 
-app.config.update(
-    dict(SECRET_KEY="powerful_secretkey", WTF_CSRF_SECRET_KEY="a_csrf_secret_key")
-)
+app.config.update(dict(SECRET_KEY="powerful_secretkey", WTF_CSRF_SECRET_KEY="a_csrf_secret_key"))
 
 separator = "-" * 80
 
@@ -473,6 +495,38 @@ def index():
 def docs():
     """docstring."""
     return render_template("docs.html")
+
+
+@app.route("/crispr", methods=["GET", "POST"])
+def crispr():
+    """docstring."""
+    user_data = request.form or MultiDict()
+    form = CrisprForm(formdata=MultiDict(user_data))
+    system = user_data.get("system")
+    print(system)
+    sgrna = user_data.get("sgrna")
+    target = user_data.get("target")
+    if not sgrna or not target:
+        return render_template("crispr.html", form=form)
+    sgrna_dsr = read(sgrna)
+    target_dsr = read(target)
+
+    from pydna.crispr import cas9, protospacer
+
+    result_text = "CRISPR simulation\n\n"
+
+    guidelist = []
+    for ps in protospacer(sgrna_dsr):
+        gd = cas9(ps)
+        result_text += f"{str(gd)}\n\n"
+        guidelist.append(gd)
+
+    msg = ""
+    for f in target_dsr.cut(guidelist):
+        msg += f">CRISPr_fragment_{len(f)}bp\n{f.seq}\n\n"
+    result_text += msg or "No CRISPr digestion."
+
+    return render_template("result.html", result=result_text)
 
 
 @app.route("/digest", methods=["GET", "POST"])
@@ -502,11 +556,7 @@ def digest():
     )
 
     custom_enzymes = RestrictionBatch(
-        [
-            e
-            for e in AllEnzymes
-            if str(e).lower() in str(user_data.get("given_enzymes")).lower()
-        ]
+        [e for e in AllEnzymes if str(e).lower() in str(user_data.get("given_enzymes")).lower()]
     )
 
     enzymes.update(custom_enzymes)
@@ -521,15 +571,9 @@ def digest():
     if inserts:
         bb_once_cutters = backbone.once_cutters(enzymes)
 
-        i_no_cutters = RestrictionBatch.intersection(
-            *[i.no_cutters(enzymes) for i in inserts]
-        )
-        i_once_cutters = RestrictionBatch.intersection(
-            *[i.once_cutters(enzymes) for i in inserts]
-        )
-        i_twice_cutters = RestrictionBatch.intersection(
-            *[i.twice_cutters(enzymes) for i in inserts]
-        )
+        i_no_cutters = RestrictionBatch.intersection(*[i.no_cutters(enzymes) for i in inserts])
+        i_once_cutters = RestrictionBatch.intersection(*[i.once_cutters(enzymes) for i in inserts])
+        i_twice_cutters = RestrictionBatch.intersection(*[i.twice_cutters(enzymes) for i in inserts])
 
         # print(bb_once_cutters, i_no_cutters)
         # print([i.no_cutters(enzymes) for i in inserts])
@@ -617,9 +661,7 @@ def toggle():
     if not s:
         return render_template("toggle.html", form=form)
 
-    pattern = (
-        r"(?:>.+\n^(?:^[^>]+?)(?=\n\n|>|LOCUS|ID))|(?:(?:LOCUS|ID)(?:(?:.|\n)+?)^//)"
-    )
+    pattern = r"(?:>.+\n^(?:^[^>]+?)(?=\n\n|>|LOCUS|ID))|(?:(?:LOCUS|ID)(?:(?:.|\n)+?)^//)"
     result_text = ""
     rawseqs = re.findall(pattern, dedent(s + "\n\n"), flags=re.MULTILINE)
     if rawseqs:
@@ -674,16 +716,14 @@ def enum():
 
     result_text = ""
 
-    from pydna.myprimers import PrimerList
-
     try:
         startnumber = int(user_data.get("startnumber"))
     except ValueError:
         startnumber = 1
 
-    pl = PrimerList([read(f">{startnumber-1}_fakeprimer\na")])
+    pl = PrimerList([read_primer(f">{startnumber-1}_fakeprimer\na")])
 
-    result_text += pl.assign_numbers(parse(s))
+    result_text += pl.assign_numbers(parse_primers(s))
 
     return render_template("result.html", result=result_text)
 
@@ -913,7 +953,7 @@ def asmdesign():
                 )
             )
         else:
-            result_items.append(item.format("fasta-2line"))
+            result_items.append(item.format("primer"))
 
     result_text = f"\n{separator}\n".join(result_items)
     return render_template("result.html", form=form, result=result_text)
@@ -938,8 +978,9 @@ def assembly():
     else:
         candidates = asm.assemble_linear()
 
-    assembly_results = "\n".join(
-        f"""\
+    assembly_results = (
+        "\n".join(
+            f"""\
 Figure:
 
 {candidate.figure()}
@@ -953,7 +994,9 @@ Resulting sequence:
 >{candidate.name} { {False:'linear',True:'circular'}[candidate.circular] }
 {candidate.seq}
 ---"""
-        for candidate in candidates
+            for candidate in candidates
+        )
+        or "\n\n\n\n\n\nNo assembly result.\n\nTry a shorter homology limit.\n\n\n\n"
     )
 
     # return redirect(url_for('assembly'))
@@ -975,9 +1018,7 @@ def tm():
 
     tm_results = f"Biopython v{default['Biopython_version']} "
     tm_results += f"{default['func']} Arguments("
-    tm_results += ", ".join(
-        f"{k}: {user_data[k]}" for k in default.keys() if k in user_data.keys()
-    )
+    tm_results += ", ".join(f"{k}: {user_data[k]}" for k in default.keys() if k in user_data.keys())
     tm_results += ")\n\n"
 
     for primer in primers:
@@ -1003,7 +1044,7 @@ def tm():
         )
         primer.description = f"tm={round(tm, 3)}"
 
-    tm_results += "\n".join(p.format("fasta-2line") for p in primers)
+    tm_results += "\n".join(p.format("primer") for p in primers)
 
     return render_template("result.html", form=form, result=tm_results)
 

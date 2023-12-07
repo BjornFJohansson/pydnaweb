@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-# eval "$(/home/bjorn/mambaforge/condabin/mamba shell.bash hook)"
+# eval "$(/home/bjorn/mambaforge/condabin/mamba shell hook)"
 
-mamba activate bjorn311
+eval "$(/home/bjorn/mambaforge/bin/conda shell.bash hook)"
+conda activate bjorn311
+
+# source ~/.lib/mamba/bin/activate
 
 export FLASK_APP=pydnaweb.py&&export FLASK_ENV=development&&flask run --debug
 
