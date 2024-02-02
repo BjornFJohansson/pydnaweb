@@ -79,6 +79,11 @@ morethansixcutters = [e for e in commonly if e.size > 6]
 lessthansixcutters = [e for e in commonly if e.size < 6]
 
 
+pcrlimit = 12
+recombinationlimit = 25
+
+
+
 default = {
     "Biopython_version": bpversion,
     "func": f"{Tm_NN.__module__}.{Tm_NN.__name__}",
@@ -135,11 +140,36 @@ crispr_systems = [
 ]
 
 
-class WebPCRForm(FlaskForm):
+class FusionPCRForm(FlaskForm):
     """docstring."""
 
     default = dedent(
         """\
+    >fp
+    ggatccAGGGGCTGTTAGTTATGG
+
+    >rp
+    ggatccTTTTGATACGGACCCGCA
+
+    >left_fragment
+    AGGGGCTGTTAGTTATGGCCTGCGAGGATTCAAAAAGGGCCGATCCGGAG
+
+    >right_fragment
+    AAGGGCCGATCCGGAGAGACGGGCTTCAAAGCTGCCTGACGACGGTTGCGGGTCCGTATCAAAA
+    """
+    )
+
+    sequences = TextAreaField("primer_text", default=default)
+
+    limit = IntegerField("limit", default=pcrlimit)
+
+    send = SubmitField("submit")
+
+
+class WebPCRForm(FlaskForm):
+    """docstring."""
+
+    default = dedent("""\
     >1_5CYC1clone
     GATCGGCCGGATCCAAATGACTGAATTCAAGGCCG
 
@@ -148,12 +178,11 @@ class WebPCRForm(FlaskForm):
 
     >CYC1 YJR048W S. cerevisiae Cytochrome c, isoform 1
     atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaagggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagatgccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtaccaagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
-    """
-    )
+    """)
 
     sequences = TextAreaField("primer_text", default=default)
 
-    limit = IntegerField("limit", default=16)
+    limit = IntegerField("limit", default=pcrlimit)
 
     send = SubmitField("submit")
 
@@ -279,11 +308,6 @@ class EnumForm(FlaskForm):
     sequences = TextAreaField("sequences", default=default)
 
     send = SubmitField("submit")
-
-
-# class MultiCheckboxField(SelectMultipleField):
-#     widget = widgets.ListWidget(prefix_label=False)
-#     option_widget = widgets.CheckboxInput()
 
 
 MultiCheckboxField = SelectMultipleField
@@ -456,7 +480,7 @@ class AssemblyForm(FlaskForm):
         choices=[("linear", "linear"), ("circular", "circular")],
         default="linear",
     )
-    limit = IntegerField("limit", default=30)
+    limit = IntegerField("limit", default=recombinationlimit)
 
     default = dedent(
         """\
@@ -497,13 +521,63 @@ def docs():
     return render_template("docs.html")
 
 
+@app.route("/gateway", methods=["GET", "POST"])
+def gateway():
+    """docstring."""
+    return render_template("gateway.html")
+
+
+@app.route("/seguid", methods=["GET", "POST"])
+def seguid():
+    """docstring."""
+    return render_template("seguid.html")
+
+
+@app.route("/fusionpcr", methods=["GET", "POST"])
+def fusionpcr():
+    """docstring."""
+    user_data = request.form or MultiDict()
+    form = FusionPCRForm(formdata=MultiDict(user_data))
+    s = user_data.get("sequences")
+    if not s:
+        return render_template("fusionpcr.html", form=form)
+
+    from pydna.fusionpcr import fuse_by_pcr, list_parts
+
+    fp, rp, *frags = parse(s)
+
+    limit = int(user_data.get("limit")) or pcrlimit
+    results = fuse_by_pcr(frags, limit=limit)
+
+    result_text = ""
+
+    for result in results:
+        result_text += list_parts(result)
+
+        ann = Anneal((fp, rp), result, limit=limit)
+
+        for amplicon in ann.products:
+
+            result_text += f"""\
+Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
+
+{amplicon.figure()}
+
+>{amplicon.name}
+{amplicon.seq}
+
+
+"""
+
+    return render_template("result.html", result=result_text)
+
+
 @app.route("/crispr", methods=["GET", "POST"])
 def crispr():
     """docstring."""
     user_data = request.form or MultiDict()
     form = CrisprForm(formdata=MultiDict(user_data))
     system = user_data.get("system")
-    print(system)
     sgrna = user_data.get("sgrna")
     target = user_data.get("target")
     if not sgrna or not target:
@@ -746,7 +820,7 @@ def pcr():
 
     primer_sequences = sequences
 
-    homology_limit = int(user_data.get("limit")) or 12
+    homology_limit = int(user_data.get("limit")) or pcrlimit
 
     cutoff_detailed_figure = 5
 
@@ -799,13 +873,11 @@ def primerdesign():
 
     templates = parse(user_data["sequences"])
 
-    homology_limit = 12
-
     amplicon = None
     result_text = ""
 
     for template in templates:
-        amplicon = primer_design(template, limit=homology_limit)  # TODO Tm_NN
+        amplicon = primer_design(template, limit=pcrlimit)  # TODO Tm_NN
 
         if amplicon:
             result_text += f"""\
@@ -834,19 +906,17 @@ def matchingprimer():
 
     templates = parse(user_data["sequences"])
 
-    homology_limit = 12
-
     amplicon = None
 
     result_text = ""
 
     for p, template in zip(templates[::2], templates[1::2]):
         try:
-            amplicon = primer_design(template, fp=p, limit=homology_limit)  # TODO Tm_NN
+            amplicon = primer_design(template, fp=p, limit=pcrlimit)  # TODO Tm_NN
         except ValueError:  # ValueError
             pass
         try:
-            amplicon = primer_design(template, rp=p, limit=homology_limit)  # TODO Tm_NN
+            amplicon = primer_design(template, rp=p, limit=pcrlimit)  # TODO Tm_NN
         except ValueError:  # ValueError
             pass
 
@@ -919,7 +989,7 @@ def asmdesign():
             except ValueError:
                 pass
         else:
-            ann = Anneal((fp, rp), tp, limit=12)  # TODO Tm_NN
+            ann = Anneal((fp, rp), tp, limit=pcrlimit)  # TODO Tm_NN
             seq, *rest = ann.products
 
         sequences.append(seq)
@@ -968,7 +1038,7 @@ def assembly():
 
     if request.method == "GET" or not user_data.get("sequences"):
         form.topology.data = user_data.get("topology", "linear")
-        form.limit.data = user_data.get("limit", 25)
+        form.limit.data = user_data.get("limit", recombinationlimit)
         return render_template("assembly.html", form=form, result="")
 
     sequences = parse(user_data["sequences"])
