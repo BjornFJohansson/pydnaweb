@@ -1,12 +1,15 @@
+import re
 from pathlib import Path
 import streamlit as st
 from pydna.readers import read
-from Bio.Restriction import CommOnly, EcoRI, KpnI # AllEnzymes
+from Bio.Restriction import AllEnzymes, RestrictionBatch
 
 default = """\
->CYC1 YJR048W S. cerevisiae Cytochrome c, isoform 1
-atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaagggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagatgccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtaccaagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
-"""
+>CYC1 YJR048W S. cerevisiae Cytochrome c isoform 1
+atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaag
+ggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagat
+gccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtacc
+aagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa"""
 
 st.set_page_config(layout="wide")
 title = Path(__file__).stem
@@ -20,6 +23,10 @@ if 'clicked' not in st.session_state:
 if st.session_state.clicked:
     value = default
     st.session_state.clicked = False
+
+enzymes = st.text_input("Enzymes")
+
+myenzymes = RestrictionBatch([e for e in AllEnzymes if str(e).lower() in re.split(r"\W+", enzymes.lower())])
 
 text_entered = st.text_area("Enter two primers and one template:",
                             height = 300,
@@ -41,10 +48,13 @@ if clear:
     st.session_state.clicked = False
 elif example:
     st.session_state.clicked = True
-elif submit and text_entered:
+elif submit and text_entered and myenzymes:
     sequence = read(text_entered)
-    results = sequence.cut(EcoRI, KpnI)
+    results = sequence.cut(myenzymes)
+    report = "´´´"
+    sequences = ""
     for result in results:
-        st.code(f"´´´\n{repr(result.seq)}\n´´´", language=None)
-        st.code(result.format("fasta-2line"), language=None)
-        st.divider()
+        report += f"\n{repr(result.seq)}\n"
+        sequences += result.format("fasta-2line") + "\n\n"
+    report += "´´´\n\n"
+    st.code(report + sequences, language=None)

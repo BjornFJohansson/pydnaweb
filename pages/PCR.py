@@ -11,8 +11,11 @@ GATCGGCCGGATCCAAATGACTGAATTCAAGGCCG
 >2_3CYC1clon
 CGATGTCGACTTAGATCTCACAGGCTTTTTTCAAG
 
->CYC1 YJR048W S. cerevisiae Cytochrome c, isoform 1
-atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaagggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagatgccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtaccaagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
+>CYC1 YJR048W S. cerevisiae Cytochrome c isoform 1
+atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaag
+ggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagat
+gccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtacc
+aagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
 """
 
 title = Path(__file__).stem
@@ -28,6 +31,8 @@ if 'clicked' not in st.session_state:
 if st.session_state.clicked:
     value = default
     st.session_state.clicked = False
+
+limit = st.number_input("Annealing limit", min_value = 0, value=13)
 
 text_entered = st.text_area("Enter two primers and one template:",
                             height = 300,
@@ -53,7 +58,9 @@ elif submit and text_entered:
     fp, rp, template = parse(text_entered)
     fp = Primer(str(fp.seq))
     rp = Primer(str(rp.seq))
-    result = pcr(fp, rp, template)
+    result = pcr(fp, rp, template, limit=limit)
     st.code(f"´´´\n{result.figure()}\n´´´", language=None)
     st.divider()
     st.code(result.format("fasta"), language=None)
+else:
+    st.session_state.clicked = False
