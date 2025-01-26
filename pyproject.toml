@@ -1,23 +1,19 @@
-[tool.poetry]
+[project]
 name = "pydnaweb"
 version = "0.1.0"
-description = "Selected pydna functiality exposed on the web."
-authors = ["BjornFJohansson <bjornjobb@gmail.com>"]
-license = "MIT"
+description = "Pydna on the web!"
+authors = [
+    {name = "BjornFJohansson",email = "bjornjobb@gmail.com"}
+]
+license = {text = "mit"}
 readme = "README.md"
+requires-python = "^3.12"
+dependencies = [
+    "streamlit (>=1.41.1,<2.0.0)",
+    "pydna @ git+https://github.com/pydna-group/pydna.git@Dseq2"
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-Flask = "^3.1.0"
-Flask-WTF = "^1.2.2"
-biopython = "^1.84"
-seguid = "^0.1.0"
-pydna = { git = "https://github.com/BjornFJohansson/pydna.git", branch = "master" }
-pyparsing = "^3.2.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.3"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
