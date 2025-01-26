@@ -70,6 +70,44 @@ from pydna.design import circular_assembly_fragments
 from pydna.assembly import Assembly
 from pydna.tm import tm_default
 from pydna.genbankfixer import gbtext_clean
+from seguid import lsseguid as _lsseguid
+from seguid import csseguid as _csseguid
+from seguid import ldseguid as _ldseguid
+from seguid import cdseguid as _cdseguid
+
+tab = str.maketrans("GATCRYWSMKHBVDNgatcrywsmkhbvdn",
+                    "CTAGYRWSKMDVBHNctagyrwskmdvbhn")
+
+table = "GC,AT,TA,CG,RY,YR,WW,SS,MK,KM,HD,BV,VB,DH,NN"
+
+def rc(s):
+    """doctring."""
+    return s.translate(tab)[::-1]
+
+
+def seqfilter(seq):
+    """doctring."""
+    return "".join(b for b in seq.upper() if b in "GATCRYWSMKHBVDN")
+
+
+def lsseguid(s):
+    return _lsseguid(s.upper(), table = table)
+
+
+def csseguid(s):
+    return _csseguid(s.upper(), table = table)
+
+
+def ldseguid(s):
+    return _ldseguid(s.upper(), rc(s.upper()), 0, table = table)
+
+
+def cdseguid(s):
+    return _cdseguid(s.upper(), rc(s.upper()), table = table)
+
+
+
+
 
 
 allenzymes = sorted(AllEnzymes, key=str)
@@ -81,7 +119,7 @@ lessthansixcutters = [e for e in commonly if e.size < 6]
 
 pcrlimit = 12
 recombinationlimit = 25
-
+proteinlimit = 100
 
 
 default = {
@@ -183,6 +221,21 @@ class WebPCRForm(FlaskForm):
     sequences = TextAreaField("primer_text", default=default)
 
     limit = IntegerField("limit", default=pcrlimit)
+
+    send = SubmitField("submit")
+
+
+class TranslationForm(FlaskForm):
+    """docstring."""
+
+    default = dedent("""\
+    >359bp_PCR_prod
+    GATCGGCCGGATCCAAATGACTGAATTCAAGGCCGgttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaagggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagatgccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtaccaagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctaCTTGAAAAAAGCCTGTGAGATCTAAGTCGACATCG
+    """)
+
+    sequence = TextAreaField("sequence_text", default=default)
+
+    limit = IntegerField("protein length limit (aa)", default=proteinlimit)
 
     send = SubmitField("submit")
 
@@ -500,6 +553,24 @@ class AssemblyForm(FlaskForm):
     clear = SubmitField("clear")
 
 
+class SeguidForm(FlaskForm):
+    """docstring."""
+    sequence = TextAreaField("sequence", default="")
+    calc = SubmitField("calc")
+    reverse = SubmitField("reverse")
+    complement = SubmitField("complement")
+    reverse_complement = SubmitField("reverse_complement")
+    send = SubmitField("submit")
+    clear = SubmitField("clear")
+
+    lsseguid = StringField("lsseguid")
+    csseguid = StringField("csseguid")
+    ldseguid = StringField("ldseguid")
+    cdseguid = StringField("cdseguid")
+    length = StringField("length")
+    charset = StringField("charset"),
+
+
 nn_tables = {"1": _mt.DNA_NN1, "2": _mt.DNA_NN2, "3": _mt.DNA_NN3, "4": _mt.DNA_NN4}
 
 app = Flask(__name__)
@@ -530,7 +601,42 @@ def gateway():
 @app.route("/seguid", methods=["GET", "POST"])
 def seguid():
     """docstring."""
-    return render_template("seguid.html")
+    user_data = request.form or MultiDict()
+    form = SeguidForm(formdata=MultiDict(user_data))
+    s = user_data.get("sequence")
+    if not s:
+        return render_template("seguid.html", form=form)
+    sequence = seqfilter(s) or ""
+    if 'calc' in request.form:
+        pass
+    elif 'reverse' in request.form:
+        sequence = sequence[::-1]
+    elif 'complement' in request.form:
+        sequence = rc(sequence)[::-1]
+    elif 'reverse_complement' in request.form:
+        sequence = rc(sequence)
+    elif 'clear' in request.form:
+        return render_template("seguid.html")
+    print(request.form)
+
+    if sequence:
+        slseg = lsseguid(sequence)
+        scseg = csseguid(sequence)
+        dlseg = ldseguid(sequence)
+        dcseg = cdseguid(sequence)
+    else:
+        slseg = ""
+        scseg = ""
+        dlseg = ""
+        dcseg = ""
+
+    form.csseguid = scseg,
+    form.ldseguid = dlseg,
+    form.cdseguid = dcseg,
+    form.length = len(sequence) or "",
+    form.charset = " ".join(sorted(set(sequence.upper()))),
+    #form.sequence = sequence
+    return render_template("seguid.html", form=form)
 
 
 @app.route("/fusionpcr", methods=["GET", "POST"])
@@ -700,6 +806,37 @@ All enzymes used in the analysis:
 {" ".join(str(e) for e in sorted(enzymes))}
 
 """
+
+    return render_template("result.html", result=result_text)
+
+@app.route("/restrictionligation", methods=["GET", "POST"])
+def restrictionligation():
+    result_text = "hejej"
+    return render_template("result.html", result=result_text)
+
+@app.route("/translation", methods=["GET", "POST"])
+def translation():
+
+    user_data = request.form or MultiDict()
+    form = TranslationForm(formdata=MultiDict(user_data))
+    s = user_data.get("sequence")
+    if not s:
+        return render_template("translation.html", form=form)
+
+    from pydna.readers import read
+
+    s = read(s)
+    result_text = "\n"
+    for orf in s.orfs():
+        prt = orf.translate()
+        prt.id = f"{len(prt)}aa"
+        result_text += prt.format("fasta-2line") + "\n\n"
+
+    s.orfs_to_features()
+
+    s.features = s.orfs_to_features() + s.features
+
+    result_text += s.format("gb")
 
     return render_template("result.html", result=result_text)
 

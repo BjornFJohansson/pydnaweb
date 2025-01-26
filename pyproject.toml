@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "pydnaweb"
+version = "0.1.0"
+description = "Selected pydna functiality exposed on the web."
+authors = ["BjornFJohansson <bjornjobb@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Flask = "^3.1.0"
+Flask-WTF = "^1.2.2"
+biopython = "^1.84"
+seguid = "^0.1.0"
+pydna = { git = "https://github.com/BjornFJohansson/pydna.git", branch = "master" }
+pyparsing = "^3.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

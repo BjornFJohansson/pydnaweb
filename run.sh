@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
-# eval "$(/home/bjorn/mambaforge/condabin/mamba shell hook)"
+#export PATH="$HOME/bin:$PATH"
+#export MAMBA_ROOT_PREFIX="/home/bjorn/miniforge3"
+#eval "$(micromamba shell hook --shell bash)"
+#micromamba activate bjorn311
 
-eval "$(/home/bjorn/mambaforge/bin/conda shell.bash hook)"
-conda activate bjorn311
+# pyenv which python
 
-# source ~/.lib/mamba/bin/activate
+#export FLASK_APP=pydnaweb.py&&export FLASK_ENV=development&&
 
-export FLASK_APP=pydnaweb.py&&export FLASK_ENV=development&&flask run --debug
+flask run --debug
 
 echo "press any key to close"
 read -n1 slask
