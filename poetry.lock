@@ -958,7 +958,7 @@ gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3)", "scipy (>
 type = "git"
 url = "https://github.com/pydna-group/pydna.git"
 reference = "Dseq2"
-resolved_reference = "47404751d467d1770ab6b50eff983a5ef5bace8d"
+resolved_reference = "7dad56bf01726c6c9e68aa9a26d9b0c2219bc59f"
 
 [[package]]
 name = "pyfiglet"
