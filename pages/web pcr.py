@@ -3,8 +3,7 @@ from pydna.parsers import parse
 from pydna.amplify import Anneal
 from pydna.primer import Primer
 from pathlib import Path
-from textwrap import dedent, indent
-from PIL import Image
+from textwrap import dedent
 
 default = """\
 >1_5CYC1clone
@@ -21,25 +20,6 @@ aagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
 """
 cutoff_detailed_figure = 5
 
-report_template = """\
-
-Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
-
-```
-{amplicon.figure()}
-```
-
-Taq DNA pol
-{amplicon.program()}
-DNA pol w DNA binding domain (PHUSION)
-{amplicon.dbd_program()}
-
->{amplicon.name}
-{amplicon.seq}
-
-"""
-
-
 title = Path(__file__).stem
 
 st.set_page_config(layout="wide")
@@ -54,14 +34,14 @@ if st.session_state.clicked:
     value = default
     st.session_state.clicked = False
 
-limit = st.number_input("Annealing limit", min_value = 0, value=13)
+limit = st.number_input("Annealing limit", min_value=0, value=13)
 
 text_entered = st.text_area("Enter two primers and one template:",
-                            height = 300,
+                            height=300,
                             placeholder=default,
-                            value = value)
+                            value=value)
 
-col1, col2, col3, col4 = st.columns([1,1,1,1])
+col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
 with col1:
     submit = st.button("submit")
@@ -97,7 +77,7 @@ elif submit and text_entered:
             result_text = ""
             for amplicon in products:
                 result_text += dedent("""\
-                # PCR
+                # pcr
 
                 Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
 

@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from textwrap import dedent
 import streamlit as st
 from pydna.readers import read
 from Bio.Restriction import AllEnzymes, RestrictionBatch
@@ -51,12 +52,26 @@ if clear:
 elif example:
     st.session_state.clicked = True
 elif submit and text_entered and myenzymes:
-    sequence = read(text_entered)
-    results = sequence.cut(myenzymes)
-    report = "´´´"
+    target = read(text_entered)
+    results = target.cut(myenzymes)
+    frag_repr = "´´´"
     sequences = ""
     for result in results:
-        report += f"\n{repr(result.seq)}\n"
+        frag_repr += f"\n{repr(result.seq)}\n"
         sequences += result.format("fasta-2line") + "\n\n"
-    report += "´´´\n\n"
-    st.code(report + sequences, language=None)
+    frag_repr += "´´´\n\n"
+    result_text = dedent("""\
+    # cut
+
+    enzymes: {enzymes}
+
+    {frag_repr}
+
+    >{target.name} {enzymes}
+    {target.seq}
+
+    {sequences}""").format(frag_repr=frag_repr,
+                           enzymes=" ".join(str(e) for e in myenzymes),
+                           target=target,
+                           sequences=sequences)
+    st.code(result_text, language=None)
