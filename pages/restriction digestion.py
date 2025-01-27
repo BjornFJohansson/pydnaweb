@@ -24,24 +24,26 @@ if st.session_state.clicked:
     value = default
     st.session_state.clicked = False
 
-enzymes = st.text_input("Enzymes")
+enzymes = st.text_input("Enzymes separated by space or comma:")
 
 myenzymes = RestrictionBatch([e for e in AllEnzymes if str(e).lower() in re.split(r"\W+", enzymes.lower())])
 
-text_entered = st.text_area("Enter two primers and one template:",
+text_entered = st.text_area("Enter a sequence to be digested:",
                             height = 300,
                             placeholder=default,
                             value = value)
 
-col1, col2, col3 = st.columns([1,1,1])
+col1, col2, col3, col4 = st.columns([1,1,1,1])
 
 with col1:
     submit = st.button("submit")
 with col2:
     clear = st.button("clear")
-with col3:
+# with col3:
+#     clear = st.link_button("go to pydnaweb", "https://pydnaweb.streamlit.app")
+with col4:
     example = st.button('example data')
-    st.session_state.clicked = True
+    # st.session_state.clicked = True
 
 if clear:
     st.empty()

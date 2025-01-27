@@ -67,11 +67,11 @@ with col1:
     submit = st.button("submit")
 with col2:
     clear = st.button("clear")
-with col3:
-    clear = st.link_button("Go to pydnaweb", "https://streamlit.io/gallery")
+# with col3:
+#     clear = st.link_button("go to pydnaweb", "https://pydnaweb.streamlit.app")
 with col4:
     example = st.button('example data')
-    st.session_state.clicked = True
+    # st.session_state.clicked = True
 
 
 if clear:
