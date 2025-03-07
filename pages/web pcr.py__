@@ -25,27 +25,43 @@ title = Path(__file__).stem
 st.set_page_config(layout="wide")
 st.header(title, divider="rainbow")
 
+value = ""
+
+if 'clicked' not in st.session_state:
+    st.session_state.clicked = False
+
+if st.session_state.clicked:
+    value = default
+    st.session_state.clicked = False
+
 limit = st.number_input("Annealing limit", min_value=0, value=13)
 
-# Initialize session state for text area
-if "text_area_content" not in st.session_state:
-    st.session_state.text_area_content = ""
+text_entered = st.text_area("Enter two primers and one template:",
+                            height=300,
+                            placeholder=default,
+                            value=value)
 
-# Buttons to fill or clear the text area
-col1, col2 = st.columns(2)
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+
 with col1:
     submit = st.button("submit")
 with col2:
-    if st.button("clear"):
-        st.session_state.text_area_content = ""
-with col3:
-    if st.button("fill with example data"):
-        st.session_state.text_area_content = default
+    clear = st.button("clear")
+# with col3:
+#     clear = st.link_button("go to pydnaweb", "https://pydnaweb.streamlit.app")
+with col4:
+    example = st.button('example data')
+    # st.session_state.clicked = True
 
-if submit and st.session_state.text_area_content:
+
+if clear:
+    st.empty()
+    st.session_state.clicked = False
+elif example:
+    st.session_state.clicked = True
+elif submit and text_entered:
     result_text = ""
-    sequences = parse(st.session_state.text_area_content)
+    sequences = parse(text_entered)
     if not len(sequences) == 3:
         result_text += f"Expected three sequences, found {len(sequences)}\n"
     else:
@@ -93,10 +109,7 @@ if submit and st.session_state.text_area_content:
                                           phu=amplicon.dbd_program())
         else:
             result_text += "\n" + ann.template.format("gb")
-        st.code(result_text, language=None)
 
-st.text_area("Enter two primers and one template:",
-             st.session_state.text_area_content,
-             height=350,
-             key="text_area_content",
-             placeholder=default)
+        st.code(result_text, language=None)
+else:
+    st.session_state.clicked = False

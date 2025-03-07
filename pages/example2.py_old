@@ -1,0 +1,30 @@
+import time
+import streamlit as st
+from streamlit.components.v1 import html
+
+#### HEADER: Start a new div
+st.markdown('<div id="my-section-{tab_id}"></div>'.format(tab_id = "<your-tab-id>"), unsafe_allow_html=True)
+
+#### PLACEHOLDER: BODY: Render the section as per your app using streamlit primitives (st.plotly_chart
+#
+# Your Streamlit code rendering whatever you want goes here.
+#
+
+#### FOOTER: At the end of your section, include JS that shifts attention to the HEADER you created above
+
+html('''
+  <script>
+      // Time of creation of this script = {now}.
+      // The time changes everytime and hence would force streamlit to execute JS function
+      function scrollToMySection() {{
+          var element = window.parent.document.getElementById("my-section-{tab_id}");
+          if (element) {{
+              element.scrollIntoView({{ behavior: "smooth" }});
+          }} else {{
+              setTimeout(scrollToMySection, 100);
+          }}
+      }}
+      scrollToMySection();
+  </script>
+  '''.format(now=time.time(), tab_id="<your-tab-id>"
+))

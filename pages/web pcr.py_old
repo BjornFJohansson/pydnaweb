@@ -1,4 +1,6 @@
 import streamlit as st
+from streamlit.components.v1 import html
+import time
 from pydna.parsers import parse
 from pydna.amplify import Anneal
 from pydna.primer import Primer
@@ -25,6 +27,8 @@ title = Path(__file__).stem
 st.set_page_config(layout="wide")
 st.header(title, divider="rainbow")
 
+# value = ""
+
 limit = st.number_input("Annealing limit", min_value=0, value=13)
 
 # Initialize session state for text area
@@ -43,9 +47,16 @@ with col3:
     if st.button("fill with example data"):
         st.session_state.text_area_content = default
 
-if submit and st.session_state.text_area_content:
+# Display the text area and ensure it updates properly
+text_entered = st.text_area("Enter two primers and one template:",
+                            st.session_state.text_area_content,
+                            height=350,
+                            key="text_area_content",
+                            placeholder=default)
+
+if submit and text_entered:
     result_text = ""
-    sequences = parse(st.session_state.text_area_content)
+    sequences = parse(text_entered)
     if not len(sequences) == 3:
         result_text += f"Expected three sequences, found {len(sequences)}\n"
     else:
@@ -93,10 +104,24 @@ if submit and st.session_state.text_area_content:
                                           phu=amplicon.dbd_program())
         else:
             result_text += "\n" + ann.template.format("gb")
+
+        st.markdown('<div id="my-section-{tab_id}"></div>'.format(tab_id = "<your-tab-id>"), unsafe_allow_html=True)
         st.code(result_text, language=None)
 
-st.text_area("Enter two primers and one template:",
-             st.session_state.text_area_content,
-             height=350,
-             key="text_area_content",
-             placeholder=default)
+
+        html('''
+          <script>
+              // Time of creation of this script = {now}.
+              // The time changes everytime and hence would force streamlit to execute JS function
+              function scrollToMySection() {{
+                  var element = window.parent.document.getElementById("my-section-{tab_id}");
+                  if (element) {{
+                      element.scrollIntoView({{ behavior: "smooth" }});
+                  }} else {{
+                      setTimeout(scrollToMySection, 100);
+                  }}
+              }}
+              scrollToMySection();
+          </script>
+          '''.format(now=time.time(), tab_id="<your-tab-id>"
+        ))

@@ -11,7 +11,7 @@ components.html(
         <link rel="icon" type="image/png" href="/favicon.png"/>
         <link rel="icon" type="image/png" href="https://example.com/favicon.png"/>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.5">
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 

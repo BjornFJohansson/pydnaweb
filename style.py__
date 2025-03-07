@@ -1,0 +1,23 @@
+import streamlit as st
+
+# Inject Custom CSS for styling st.code
+st.markdown("""
+    <style>
+        /* Target all code blocks */
+        pre, code {
+            background-color: #1e1e1e !important; /* Dark background */
+            color: #ffffff !important; /* Light text */
+            border-radius: 5px; /* Rounded corners */
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# st.title("Styled st.code Output")
+
+# # Example Code Block
+# code_string = """def hello_world():
+#     print("Hello, Streamlit!")"""
+
+# st.code(code_string, language="python")
