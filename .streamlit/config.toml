@@ -4,3 +4,7 @@
 # "serif", or "monospace".
 
 font = "monospace"
+
+# https://discuss.streamlit.io/t/why-do-default-values-cause-a-session-state-warning/15485/33
+[global]
+disableWidgetStateDuplicationWarning = true

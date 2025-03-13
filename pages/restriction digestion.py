@@ -5,6 +5,8 @@ import streamlit as st
 from pydna.readers import read
 from Bio.Restriction import AllEnzymes, RestrictionBatch
 
+default_enzymes = "KpnI"
+
 default = """\
 >CYC1 YJR048W S. cerevisiae Cytochrome c isoform 1
 atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaag
@@ -16,50 +18,36 @@ st.set_page_config(layout="wide")
 title = Path(__file__).stem
 st.header(title, divider="rainbow")
 
-value = ""
+# Initialize session state for text area
+if "text_area_content" not in st.session_state:
+    st.session_state.text_area_content = ""
 
-if 'clicked' not in st.session_state:
-    st.session_state.clicked = False
+if "enzymes" not in st.session_state:
+    st.session_state.enzymes = ""
 
-if st.session_state.clicked:
-    value = default
-    st.session_state.clicked = False
-
-enzymes = st.text_input("Enzymes separated by space or comma:")
-
-myenzymes = RestrictionBatch([e for e in AllEnzymes if str(e).lower() in re.split(r"\W+", enzymes.lower())])
-
-text_entered = st.text_area("Enter a sequence to be digested:",
-                            height = 300,
-                            placeholder=default,
-                            value = value)
-
-col1, col2, col3, col4 = st.columns([1,1,1,1])
-
+# Buttons to fill or clear the text area
+col1, col2 = st.columns(2)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     submit = st.button("submit")
 with col2:
-    clear = st.button("clear")
-# with col3:
-#     clear = st.link_button("go to pydnaweb", "https://pydnaweb.streamlit.app")
-with col4:
-    example = st.button('example data')
-    # st.session_state.clicked = True
+    if st.button("clear"):
+        st.session_state.text_area_content = ""
+with col3:
+    if st.button("fill with example data"):
+        st.session_state.text_area_content = default
+        st.session_state.enzymes = default_enzymes
 
-if clear:
-    st.empty()
-    st.session_state.clicked = False
-elif example:
-    st.session_state.clicked = True
-elif submit and text_entered and myenzymes:
-    target = read(text_entered)
+if submit and st.session_state.text_area_content and st.session_state.enzymes:
+    target = read(st.session_state.text_area_content)
+    myenzymes = RestrictionBatch([e for e in AllEnzymes if str(e).lower() in re.split(r"\W+", st.session_state.enzymes.lower())])
     results = target.cut(myenzymes)
     frag_repr = "´´´"
     sequences = ""
     for result in results:
         frag_repr += f"\n{repr(result.seq)}\n"
         sequences += result.format("fasta-2line") + "\n\n"
-    frag_repr += "´´´\n\n"
+    frag_repr += "´´´"
     result_text = dedent("""\
     # cut
 
@@ -75,3 +63,14 @@ elif submit and text_entered and myenzymes:
                            target=target,
                            sequences=sequences)
     st.code(result_text, language=None)
+
+enzymes = st.text_input("Enzymes separated by space or comma:",
+                        st.session_state.enzymes,
+                        key="enzyme",
+                        placeholder=default_enzymes)
+
+text_entered = st.text_area("Enter a sequence to be digested:",
+                            st.session_state.text_area_content,
+                            height=350,
+                            key="text_area_content",
+                            placeholder=default)
