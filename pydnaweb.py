@@ -1,8 +1,13 @@
 import streamlit as st
 import importlib.util
+from PIL import Image
 from sidebar import sidebar  # Import sidebar function
 
-st.set_page_config(page_title="pydnaweb", layout="wide")
+im = Image.open("favicon.ico")
+st.set_page_config(
+    page_title="pydnaweb",
+    page_icon=im,
+    layout="wide")
 
 # Detect page changes
 if "last_selected_page" not in st.session_state:
