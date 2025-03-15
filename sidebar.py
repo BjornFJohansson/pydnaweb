@@ -22,7 +22,7 @@ options = [
     "TAB format",
     "Toggle format",
     "Documentation",
-    "about",
+    "About",
 ]
 
 
