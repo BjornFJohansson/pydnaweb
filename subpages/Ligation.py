@@ -1,28 +1,19 @@
 import streamlit as st
 from pydna.parsers import parse
-from pydna.amplify import Anneal
-from pydna.primer import Primer
 from pathlib import Path
-from textwrap import dedent
 
 default = """\
->a
-atgaggcgcttttaaatatggcgaaAtaagtgatttaacgctttgaatatg
+>fragment1 linear alphabet=dsiupac
+aaaPEXI
 
->b
-taagtgatttaacgctttgaatatgCCactatatacttaaatttgatttcgt
-
->c
-actatatacttaaatttgatttcgtGGGatgaggcgcttttaaatatggcgaa
+>fragment2 linear alphabet=dsiupac
+QFZJccc
 """
 cutoff_detailed_figure = 5
 
 title = Path(__file__).stem
 
-st.set_page_config(layout="wide")
 st.header(title, divider="rainbow")
-
-limit = st.number_input("Annealing limit", min_value=0, value=13)
 
 # Initialize session state for text area
 if "text_area_content" not in st.session_state:
@@ -43,13 +34,26 @@ with col3:
 if submit and st.session_state.text_area_content:
     result_text = ""
     sequences = parse(st.session_state.text_area_content)
-    if not len(sequences) < 2:
-        result_text += f"Expected three sequences, found {len(sequences)}\n"
+    if len(sequences) < 2:
+        result_text += f"Expected at least two sequences, found {len(sequences)}\n"
     else:
+        sequences = parse(st.session_state.text_area_content)
+
+        from pydna.ligate import ligate
+
+        csequences, lsequences = ligate(sequences)
+
+        result_text = "\n".join(f"""\
+{s.format('fasta-2line')}
+    """ for s in csequences)
+
+        result_text += "\n".join(f"""\
+{s.format('fasta-2line')}
+    """ for s in lsequences)
 
         st.code(result_text, language=None)
 
-st.text_area("Enter at least two sequences:",
+st.text_area("Enter at least one sequence:",
              st.session_state.text_area_content,
              height=350,
              key="text_area_content",

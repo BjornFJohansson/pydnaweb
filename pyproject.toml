@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = "^3.12"
 dependencies = [
     "streamlit (>=1.41.1,<2.0.0)",
-    "pydna @ git+https://github.com/pydna-group/pydna.git@Dseq2"
+    "pydna @ git+https://github.com/pydna-group/pydna.git@Dseq2",
+	"streamlit_option_menu"
 ]
 
 

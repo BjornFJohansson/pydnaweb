@@ -14,7 +14,6 @@ ggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacac
 gccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtacc
 aagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa"""
 
-st.set_page_config(layout="wide")
 title = Path(__file__).stem
 st.header(title, divider="rainbow")
 
@@ -64,13 +63,13 @@ if submit and st.session_state.text_area_content and st.session_state.enzymes:
                            sequences=sequences)
     st.code(result_text, language=None)
 
-enzymes = st.text_input("Enzymes separated by space or comma:",
-                        st.session_state.enzymes,
-                        key="enzyme",
-                        placeholder=default_enzymes)
+st.text_input("Enzymes separated by space or comma:",
+              st.session_state.enzymes,
+              key="enzyme",
+              placeholder=default_enzymes)
 
-text_entered = st.text_area("Enter a sequence to be digested:",
-                            st.session_state.text_area_content,
-                            height=350,
-                            key="text_area_content",
-                            placeholder=default)
+st.text_area("Enter a sequence to be digested:",
+             st.session_state.text_area_content,
+             height=350,
+             key="text_area_content",
+             placeholder=default)

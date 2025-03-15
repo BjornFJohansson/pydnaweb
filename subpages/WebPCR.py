@@ -22,7 +22,6 @@ cutoff_detailed_figure = 5
 
 title = Path(__file__).stem
 
-st.set_page_config(layout="wide")
 st.header(title, divider="rainbow")
 
 limit = st.number_input("Annealing limit", min_value=0, value=13)
