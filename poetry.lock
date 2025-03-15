@@ -930,7 +930,7 @@ wheel = "*"
 
 [[package]]
 name = "pydna"
-version = "6.0.0-a.24.post.17+b7b559bd66"
+version = "6.0.0-a.30.post.41+0ee3463f17"
 description = "Representing double stranded DNA and functions for simulating cloning and homologous recombination between DNA molecules."
 optional = false
 python-versions = ">=3.9,<4.0"
@@ -940,7 +940,7 @@ develop = false
 
 [package.dependencies]
 appdirs = ">=1.4.4"
-biopython = ">=1.80,<1.85"
+biopython = ">=1.80"
 networkx = ">=2.8.8"
 numpy = {version = ">1.26", markers = "python_version >= \"3.9\""}
 prettytable = ">=3.5.0"
@@ -957,8 +957,8 @@ gel = ["matplotlib (>=3.4.3)", "pillow (>=8.4.0)", "scipy (>=1.11.3)", "scipy (>
 [package.source]
 type = "git"
 url = "https://github.com/pydna-group/pydna.git"
-reference = "Dseq2"
-resolved_reference = "7dad56bf01726c6c9e68aa9a26d9b0c2219bc59f"
+reference = "Dseq4"
+resolved_reference = "0706a6568eab5acfb9030601424ae3457ed8f445"
 
 [[package]]
 name = "pyfiglet"
@@ -1261,6 +1261,21 @@ watchdog = {version = ">=2.1.5,<7", markers = "platform_system != \"Darwin\""}
 snowflake = ["snowflake-connector-python (>=2.8.0)", "snowflake-snowpark-python[modin] (>=1.17.0)"]
 
 [[package]]
+name = "streamlit-option-menu"
+version = "0.4.0"
+description = "streamlit-option-menu is a simple Streamlit component that allows users to select a single item from a list of options in a menu."
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "streamlit-option-menu-0.4.0.tar.gz", hash = "sha256:48ec69d59e547fa2fa4bfae001620df8af56a80de2f765ddbb9fcbfb84017129"},
+    {file = "streamlit_option_menu-0.4.0-py3-none-any.whl", hash = "sha256:a55fc7554047b6db371595af2182e435b8a2c715ee6124e8543685bd4670b07e"},
+]
+
+[package.dependencies]
+streamlit = ">=1.36"
+
+[[package]]
 name = "tenacity"
 version = "9.0.0"
 description = "Retry code until it succeeds"
@@ -1425,4 +1440,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "edf6eb937e43f7c3bf7f660bd6a8b7b7b14db2d25fbe14bc102cbb254f521897"
+content-hash = "9dcafb2ff87ae9f423d9dcf93534ea9748360592b35d6eb5a9bb7346c3e116dd"
