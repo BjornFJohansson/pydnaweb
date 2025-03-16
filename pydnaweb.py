@@ -1,12 +1,12 @@
 import streamlit as st
 import importlib.util
-from PIL import Image
+# from PIL import Image
 from sidebar import sidebar  # Import sidebar function
 
-im = Image.open("favicon.ico")
+# im = Image.open("favicon.ico")
 st.set_page_config(
     page_title="pydnaweb",
-    page_icon=im,
+    page_icon="favicon.ico",
     layout="wide")
 
 # Detect page changes
