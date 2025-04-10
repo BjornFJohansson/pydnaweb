@@ -10,11 +10,9 @@ readme = "README.md"
 requires-python = "^3.12"
 dependencies = [
     "streamlit (>=1.41.1,<2.0.0)",
-    "pydna @ git+https://github.com/pydna-group/pydna.git@Dseq4",
+    "pydna[download] @ git+https://github.com/pydna-group/pydna.git@Dseq4",
 	"streamlit_option_menu"
 ]
-
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

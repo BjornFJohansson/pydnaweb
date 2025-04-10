@@ -24,9 +24,13 @@ if "text_area_content" not in st.session_state:
 if "enzymes" not in st.session_state:
     st.session_state.enzymes = ""
 
-# Buttons to fill or clear the text area
-col1, col2 = st.columns(2)
+st.text_input("Restriction enzymes separated by space or comma:",
+              st.session_state.enzymes,
+              key="enzymes",
+              placeholder=default_enzymes)
+
 col1, col2, col3, col4 = st.columns(4)
+# Buttons to fill or clear the text area
 with col1:
     submit = st.button("submit")
 with col2:
@@ -35,7 +39,7 @@ with col2:
 with col3:
     if st.button("fill with example data"):
         st.session_state.text_area_content = default
-        st.session_state.enzymes = default_enzymes
+        #st.session_state.enzymes = default_enzymes
 
 if submit and st.session_state.text_area_content and st.session_state.enzymes:
     target = read(st.session_state.text_area_content)
@@ -63,10 +67,7 @@ if submit and st.session_state.text_area_content and st.session_state.enzymes:
                            sequences=sequences)
     st.code(result_text, language=None)
 
-st.text_input("Enzymes separated by space or comma:",
-              st.session_state.enzymes,
-              key="enzyme",
-              placeholder=default_enzymes)
+
 
 st.text_area("Enter a sequence to be digested:",
              st.session_state.text_area_content,

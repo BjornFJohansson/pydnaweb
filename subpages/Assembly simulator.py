@@ -25,6 +25,13 @@ if "text_area_content" not in st.session_state:
 
 # Buttons to fill or clear the text area
 col1, col2 = st.columns(2)
+
+with col1:
+    st.number_input("Recombination limit", min_value=0, value=13, key="limit")
+with col2:
+    st.radio("topology", ["circular", "linear"], horizontal=True, key="topology")
+
+
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     submit = st.button("submit")
@@ -65,10 +72,7 @@ Resulting sequence:
     st.code(result_text, language=None)
 
 
-with col1:
-    st.number_input("Recombination limit", min_value=0, value=13, key="limit")
-with col3:
-    st.radio("topology", ["circular", "linear"], horizontal=True, key="topology")
+
 
 st.text_area("Enter at least two sequences:",
              st.session_state.text_area_content,

@@ -15,9 +15,10 @@ AAGGGCCGATCCGGAGAGACGGGCTTCAAAGCTGCCTGACGACGGTTGCGGGTCCGTATCAAAA"""
 
 title = Path(__file__).stem
 
-st.number_input("Annealing limit", min_value=1, value=12, key="limit")
 
 st.header(title, divider="rainbow")
+
+st.number_input("Annealing limit", min_value=1, value=12, key="limit")
 
 # Initialize session state for text area
 if "text_area_content" not in st.session_state:

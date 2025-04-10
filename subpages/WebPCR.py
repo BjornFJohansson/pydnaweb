@@ -20,9 +20,7 @@ aagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
 """
 cutoff_detailed_figure = 5
 
-title = Path(__file__).stem
-
-st.header(title, divider="rainbow")
+st.header(Path(__file__).stem, divider="rainbow")
 
 limit = st.number_input("Annealing limit", min_value=0, value=13)
 
@@ -31,7 +29,7 @@ if "text_area_content" not in st.session_state:
     st.session_state.text_area_content = ""
 
 # Buttons to fill or clear the text area
-col1, col2 = st.columns(2)
+# col1, col2 = st.columns(2)
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     submit = st.button("submit")
