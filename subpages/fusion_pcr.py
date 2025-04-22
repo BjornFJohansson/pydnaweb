@@ -5,6 +5,29 @@ from pydna.primer import Primer
 from pydna.fusionpcr import fuse_by_pcr
 from pathlib import Path
 from textwrap import dedent
+from jinja2 import Template
+
+form = """\
+---
+limit: {{ limit }}
+---
+# fusion_pcr
+```
+{% for s in sequences: %}
+{{ s.format("fasta-2line") }}
+{% endfor %}
+```
+Results:
+{% for s in fusion_products:%}
+```
+{{ s.figure() }}
+{{ s.format("fasta-2line") }}
+```
+{%endfor%}
+
+"""
+
+
 
 default = """\
 >left_fragment
@@ -45,17 +68,12 @@ if submit and st.session_state.text_area_content:
     else:
         fusion_products = fuse_by_pcr(sequences, limit=limit)
 
-        result_text = "\n".join(f"""\
-```
-{s.figure()}
-```
+        result_text = ""
+        result_text = Template(form).render(**locals())
 
->{s.name}
-{s.seq}
+    msg = "No assembly result. Perhaps try a shorter homology limit."
 
-            """ for s in fusion_products) or "No assembly result.\n\nTry a shorter homology limit."
-
-    st.code(result_text, language=None)
+    st.code(result_text or msg, language=None)
 
 st.text_area("Enter two sequences:",
              st.session_state.text_area_content,

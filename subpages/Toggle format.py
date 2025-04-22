@@ -38,38 +38,6 @@ with col3:
     if st.button("fill with example data"):
         st.session_state.text_area_content = default
 
-
-# @app.route("/toggle", methods=["GET", "POST"])
-# def toggle():
-#     """docstring."""
-#     user_data = request.form or MultiDict()
-
-#     form = ToggleForm(formdata=MultiDict(user_data))
-
-#     s = user_data.get("sequence")
-
-#     if not s:
-#         return render_template("toggle.html", form=form)
-
-#     pattern = r"(?:>.+\n^(?:^[^>]+?)(?=\n\n|>|LOCUS|ID))|(?:(?:LOCUS|ID)(?:(?:.|\n)+?)^//)"
-#     result_text = ""
-#     rawseqs = re.findall(pattern, dedent(s + "\n\n"), flags=re.MULTILINE)
-#     if rawseqs:
-#         for rawseq in rawseqs:
-#             if rawseq.startswith(">"):
-#                 outformat = "gb"
-#             else:
-#                 outformat = "fasta"
-#             seq = read(rawseq)
-#             result_text += seq.format(outformat) + "\n\n"
-#     else:
-#         outformat = "fasta"
-#         chunk = "".join(c for c in s if c in "GATCRYWSMKHBVDNgatcrywsmkhbvdn")
-#         result_text = f">seq_{len(chunk)}bp\n{chunk}"
-
-#     return render_template("result.html", result=result_text)
-
-
 st.text_area("Enter two primers and one template:",
              st.session_state.text_area_content,
              height=350,

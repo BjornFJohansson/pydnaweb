@@ -4,6 +4,45 @@ from pydna.amplify import Anneal
 from pydna.primer import Primer
 from pathlib import Path
 from textwrap import dedent
+from jinja2 import Template
+
+from tabulate import tabulate
+
+
+form = """\
+---
+limit: {{ limit }}
+---
+# pcr
+
+{{ md_table }}
+
+```
+{{ amplicon.figure() }}
+```
+
+Suggested program for Taq DNA polymerase.
+```
+{{ amplicon.program()}}
+```
+
+```
+>{{ fp.name }} {{ fp.seguid() }} (fw)
+{{ fp.seq }}
+
+>{{ rp.name }} {{ rp.seguid() }} (rv)
+{{ rp.seq }}
+
+>{{ template.name }} {{ template.seguid() }} (template)
+{{ template.seq }}
+
+>{{ amplicon.name }} {{ amplicon.seguid() }} (pcr product)
+{{ amplicon.seq }}
+
+"""
+
+
+
 
 default = """\
 >1_5CYC1clone
@@ -57,37 +96,19 @@ if submit and st.session_state.text_area_content:
         elif 1 <= len(products) <= cutoff_detailed_figure:
             result_text = ""
             for amplicon in products:
-                result_text += dedent("""\
-                # pcr
+                data = [
+                    ["fw primer", fp.name, len(fp), fp.seguid()],
+                    ["rv primer", rp.name, len(rp), rp.seguid()],
+                    ["template", template.name, len(template), template.seguid()],
+                    ["pcr product", amplicon.name, len(amplicon), amplicon.seguid()],
+                ]
+                headers = ["Component", "Name", "Size", "Seguid"]
+                md_table = tabulate(data,
+                                    headers,
+                                    tablefmt="github",
+                                    colalign=("left", "left", "left", "left"))
+                result_text += Template(form).render(**locals())
 
-                Forward: {amplicon.forward_primer.name} Reverse: {amplicon.reverse_primer.name}
-
-                {figure}
-
-                Taq DNA pol
-                {taq}
-
-                DNA pol with an ssDNA binding domain, such as Phusion DNA pol.
-                {phu}
-
-
-                >{fp.name}
-                {fp.seq}
-
-                >{rp.name}
-                {rp.seq}
-
-                >{template.name}
-                {template.seq}
-
-                >{amplicon.name}
-                {amplicon.seq}""").format(fp=fp,
-                                          rp=rp,
-                                          template=template,
-                                          amplicon=amplicon,
-                                          figure=amplicon.figure(),
-                                          taq=amplicon.program(),
-                                          phu=amplicon.dbd_program())
         else:
             result_text += "\n" + ann.template.format("gb")
         st.code(result_text, language=None)

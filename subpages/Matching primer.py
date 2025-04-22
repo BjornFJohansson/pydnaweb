@@ -5,6 +5,25 @@ from pydna.primer import Primer
 from pathlib import Path
 from textwrap import dedent
 from pydna.design import primer_design
+from jinja2 import Template
+
+form = """\
+# Matching primer
+```
+{{ amplicon.figure() }}
+```
+
+```
+>{{ amplicon.forward_primer.name }} {{ amplicon.forward_primer|length }}-mer {{ amplicon.forward_primer.seguid() }} (forward primer)
+{{ amplicon.forward_primer.seq }}
+
+>{{ amplicon.reverse_primer.name }} {{ amplicon.reverse_primer|length }}-mer {{ amplicon.forward_primer.seguid() }} (reverse primer)
+{{ amplicon.reverse_primer.seq }}
+
+>{{ amplicon.template.name }} {{ amplicon.template.seguid() }} (template)
+{{ amplicon.template.seq }}
+```
+"""
 
 default = """\
 >1_5CYC1clone
@@ -27,7 +46,7 @@ if "text_area_content" not in st.session_state:
     st.session_state.text_area_content = ""
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    limit = st.number_input("Annealing limit", min_value=0, value=13)
+    limit = st.number_input("Annealing limit", min_value=1, value=13)
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     submit = st.button("submit")
@@ -60,28 +79,12 @@ if submit and st.session_state.text_area_content:
         if not amplicon:
             result_text = "Primer does not anneal."
         else:
-            result_text += f"""\
-
->{amplicon.forward_primer.name} {len(amplicon.forward_primer)}-mer
-{amplicon.forward_primer.seq}
->{amplicon.reverse_primer.name} {len(amplicon.reverse_primer)}-mer
-{amplicon.reverse_primer.seq}
->{amplicon.template.name}
-{amplicon.template.seq}
-
-{amplicon.figure()}
-
->{amplicon.name}
-{amplicon.seq}
-
----
-
-"""
+            result_text = Template(form).render(**locals())
 
         st.code(result_text, language=None)
 
 
-st.text_area("Enter two primers and one template:",
+st.text_area("Enter one primers and one template:",
              st.session_state.text_area_content,
              height=350,
              key="text_area_content",

@@ -1,17 +1,31 @@
 import streamlit as st
 from pydna.parsers import parse
-from pydna.assembly import Assembly
 from pathlib import Path
+from jinja2 import Template
+
+form = """\
+---
+topology: {{ topology }}
+---
+# ligate
+{% for s in sequences: %}
+{{ s.format('fasta-2line') }}
+{% endfor %}
+<!-- ligation products below this comment -->
+{% for s in newsequences: %}
+{{ s.format('fasta-2line') }}
+{% endfor %}
+"""
+
+
+
 
 default = """\
->a
-atgaggcgcttttaaatatggcgaaAtaagtgatttaacgctttgaatatg
+>fragment1 linear alphabet=dsiupac
+QFZaaaPEXI
 
->b
-taagtgatttaacgctttgaatatgCCactatatacttaaatttgatttcgt
-
->c
-actatatacttaaatttgatttcgtGGGatgaggcgcttttaaatatggcgaa
+>fragment2 linear alphabet=dsiupac
+QFZJcccPEX
 """
 cutoff_detailed_figure = 5
 
@@ -25,14 +39,12 @@ if "text_area_content" not in st.session_state:
 
 # Buttons to fill or clear the text area
 col1, col2 = st.columns(2)
-
 with col1:
-    st.number_input("Recombination limit", min_value=0, value=13, key="limit")
-with col2:
     st.radio("topology", ["circular", "linear"], horizontal=True, key="topology")
 
 
 col1, col2, col3, col4 = st.columns(4)
+
 with col1:
     submit = st.button("submit")
 with col2:
@@ -42,39 +54,30 @@ with col3:
     if st.button("fill with example data"):
         st.session_state.text_area_content = default
 
+
 if submit and st.session_state.text_area_content:
+    topology = st.session_state.topology
     result_text = ""
     sequences = parse(st.session_state.text_area_content)
     if len(sequences) < 2:
         result_text += f"Expected at least two sequences, found {len(sequences)}\n"
     else:
-        asm = Assembly(sequences, limit=st.session_state.limit)
-        if st.session_state.topology == "circular":
-            candidates = asm.assemble_circular()
-        else:
-            candidates = asm.assemble_linear()
+        sequences = parse(st.session_state.text_area_content)
 
-        result_text = "\n".join(f"""\
-Figure:
+        from pydna.ligate import ligate
 
-{candidate.figure()}
+        csequences, lsequences = ligate(sequences)
 
-Detailed figure:
+        newsequences = csequences if topology == "circular" else lsequences
 
-{candidate.detailed_figure()}
+        for s in newsequences:
+            s.stamp()
 
-Resulting sequence:
+        result_text = Template(form).render(**locals())
 
->{candidate.name} { {False:'linear',True:'circular'}[candidate.circular] }
-{candidate.seq}
-    """ for candidate in candidates) or "No assembly result.\n\nTry a shorter homology limit."
+        st.code(result_text, language=None)
 
-    st.code(result_text, language=None)
-
-
-
-
-st.text_area("Enter at least two sequences:",
+st.text_area("Enter at least one sequence:",
              st.session_state.text_area_content,
              height=350,
              key="text_area_content",

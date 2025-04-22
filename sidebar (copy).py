@@ -3,46 +3,37 @@ from streamlit_option_menu import option_menu
 
 
 options = [
-    "pcr",
-    "cut",
-    "crispr",
-    "ligation",
-    "assembly",
-    "fusion_pcr",
-    "gateway",
-
-
-]
-
-options2 = [
+    "pydnaweb",
     "Experiment",
-    "Primer designer",
+    "WebPCR",
     "Assembly designer",
+    "Assembly simulator",
+    "CrispR",
+    "Fusion PCR",
+    "Gateway",
+    "Ligation",
     "Matching primer",
     "Melting temperature",
+    "Primer designer",
     "Primer enumerator",
     "Repair Genbank",
+    "Restriction digestion",
     "Restriction enzyme finder",
     "Seguid Calculator",
     "TAB format",
     "Toggle format",
     "Documentation",
-    "About",]
+    "About",
+]
 
 
 def sidebar():
     with st.sidebar:
         selected = option_menu(
-            menu_title="dnaudit",
-            options=options,
+            menu_title="Navigation",
+            options=options,  # Matches subpage names
+            # icons=["fa-dna", "flask", "book"],  # Uses font-awesome icons
             menu_icon="menu-button-wide",
             default_index=0,
         )
-        selected2 = option_menu(
-            menu_title="utilities",
-            options=options2,
-            menu_icon="menu-button-wide",
-            default_index=0,
-        )
-
     return selected
