@@ -12,6 +12,7 @@ dependencies = [
     "streamlit (>=1.41.1,<2.0.0)",
     "pydna[download] @ git+https://github.com/pydna-group/pydna.git@Dseq4",
 	"streamlit_option_menu"
+    "tabulate"
 ]
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
