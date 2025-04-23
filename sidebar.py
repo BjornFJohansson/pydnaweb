@@ -11,10 +11,6 @@ options = [
     "fusion_pcr",
     "gateway",
 
-
-]
-
-options2 = [
     "Experiment",
     "Primer designer",
     "Assembly designer",
@@ -35,12 +31,6 @@ def sidebar():
         selected = option_menu(
             menu_title="dnaudit",
             options=options,
-            menu_icon="menu-button-wide",
-            default_index=0,
-        )
-        selected2 = option_menu(
-            menu_title="utilities",
-            options=options2,
             menu_icon="menu-button-wide",
             default_index=0,
         )
