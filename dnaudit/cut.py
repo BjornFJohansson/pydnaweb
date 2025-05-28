@@ -8,22 +8,16 @@ from jinja2 import Template
 
 form ="""\
 ---
-enzymes: {{enzymes}}
+enzymes: {{enzymestring}}
 ---
-
 # cut
 
-{{frag_repr}}
-
->{target.name} {enzymes}
-{target.seq}
-
-{sequences}
-
-
-{% for result in results: %}
-    frag_repr += f"\n{repr(result.seq)}\n"
-    sequences += result.format("fasta-2line") + "\n\n"
+{{target.format("fasta-2line")}}
+{% for fragment in fragments %}
+{{fragment.seq.__repr__()}}
+{% endfor %}
+{% for fragment in fragments %}
+{{fragment.format("fasta-2line")}}
 {% endfor %}
 
 """
@@ -62,30 +56,10 @@ with col3:
 
 if submit and st.session_state.text_area_content and st.session_state.enzymes:
     target = read(st.session_state.text_area_content)
-    myenzymes = RestrictionBatch([e for e in AllEnzymes if str(e).lower() in re.split(r"\W+", st.session_state.enzymes.lower())])
-    fragments = target.cut(myenzymes)
-
-    # frag_repr = "´´´"
-    # sequences = ""
-    # for result in results:
-    #     frag_repr += f"\n{repr(result.seq)}\n"
-    #     sequences += result.format("fasta-2line") + "\n\n"
-    # frag_repr += "´´´"
-    # result_text = dedent("""\
-    # # cut
-
-    # enzymes: {enzymes}
-
-    # {frag_repr}
-
-    # >{target.name} {enzymes}
-    # {target.seq}
-
-    # {sequences}""").format(frag_repr=frag_repr,
-    #                        enzymes=" ".join(str(e) for e in myenzymes),
-    #                        target=target,
-    #                        sequences=sequences)
-    result_text += Template(form).render(**locals())
+    enzymes = RestrictionBatch([e for e in AllEnzymes if str(e).lower() in re.split(r"\W+", st.session_state.enzymes.lower())])
+    fragments = target.cut(enzymes)
+    enzymestring = " ".join(str(e) for e in enzymes)
+    result_text = Template(form).render(**locals())
     st.code(result_text, language=None)
 
 st.text_input("Restriction enzymes separated by space or comma:",

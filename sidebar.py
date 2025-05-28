@@ -10,7 +10,7 @@ options = [
     "assembly",
     "fusion_pcr",
     "gateway",
-
+    "",
     "Experiment",
     "Primer designer",
     "Assembly designer",
