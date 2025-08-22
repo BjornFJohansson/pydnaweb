@@ -2,7 +2,7 @@ import streamlit as st
 
 col1, col2, col3 = st.columns(3)
 with col2:
-    st.image("pydna_512x512_trsp.png", caption="pydna", width=300)
+    st.image("pydna_logo_769x1057.png", caption="pydna", width=300)
 
 st.markdown("""
 
