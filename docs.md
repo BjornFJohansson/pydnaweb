@@ -1,6 +1,3 @@
-import streamlit as st
-text = """
-
 Pydnaweb
 ========
 
@@ -14,9 +11,9 @@ If you have question not answered below or suggestions, please ask in the [Googl
 
 All tools accept sequences in [FASTA or Genbank](https://github.com/MetabolicEngineeringGroupCBMA/MetabolicEngineeringGroupCBMA.github.io/wiki/sequence_formats) format. The formats can be mixed.
 
-### WebPCR simulator
+### pcr
 
-WebPCR simulates PCR given at least two primers and a template sequence as a list.
+Given at least two primers and a template sequence as a list of FASTA format sequences.
 
 The **last** of the sequences in this list is assumed to be the **template** sequence while all preceding sequences are assumed to be primers.
 
@@ -104,6 +101,43 @@ As the forward primer anneals after the reverse primer, no PCR product would be 
     gatagagtcagtaaccacagctactacacacgtactgactg
 
 
+### cut
+
+Given one sequence and a least one restriction enzyme, a list with the resulting fragments will be diplayed.
+For example, the 330 bp Cytochrome C open reading frame has one KpnI site.
+
+	>CYC1 YJR048W S. cerevisiae Cytochrome c isoform 1 330bp ldseguid=f6e8MRt3BKHZTO-Mpr8nQsoipC0 
+	atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaag
+	ggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagat
+	gccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtacc
+	aagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
+
+A report is generated as detailed below. The enzymes are listed in the YAML front matter follwed by the title `# cut`.
+
+
+	---
+	enzymes: KpnI
+	---
+	# cut
+
+	>CYC1 YJR048W S. cerevisiae Cytochrome c isoform 1
+	atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaagggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagatgccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctggtaccaagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
+
+	Dseq(-251)
+	atga..cctggtac
+	tact..ggac
+
+	Dseq(-83)
+		caag..gtaa
+	catggttc..catt
+
+
+	>id description alphabet=dsiupac
+	atgactgaattcaaggccggttctgctaagaaaggtgctacacttttcaagactagatgtctacaatgccacaccgtggaaaagggtggcccacataaggttggtccaaacttgcatggtatctttggcagacactctggtcaagctgaagggtattcgtacacagatgccaatatcaagaaaaacgtgttgtgggacgaaaataacatgtcagagtacttgactaacccaaagaaatatattcctgpxei
+
+	>id description alphabet=dsiupac
+	qzfjcaagatggcctttggtgggttgaagaaggaaaaagacagaaacgacttaattacctacttgaaaaaagcctgtgagtaa
+
 
 
 
@@ -150,18 +184,6 @@ Designs primers for one or more template sequences. Three sequences are returned
 ### Restriction simulator
 
 
-    BamHI
-    EcoRI
-    SmaI
-    NotI
-
-    >ins1
-    GGATCCaaCCCGGGaGGATCC
-    >ins2
-    GGATCCttCCCGGGtGGATCC
-
-    >pUCmu 1669bp circular
-    ACGCGTCGCGAGGCCATATGGGTTAACCCATGGCCAAGCTTGCATGCCTGCAGGTCGACTCTAGAGGATCCCGGGTACCGAGCTCGAATTCGGATATCCTCGAGACTAGTGGGCCCGTTTAAACACATGTGTTTTTCCATAGGCTCCGCCCCCCTGACGAGCATCACAAAAATCGACGCTCAAGTCAGAGGTGGCGAAACCCGACAGGACTATAAAGATACCAGGCGTTTCCCCCTGGAAGCTCCCTCGTGCGCTCTCCTGTTCCGACCCTGCCGCTTACCGGATACCTGTCCGCCTTTCTCCCTTCGGGAAGCGTGGCGCTTTCTCATAGCTCACGCTGTAGGTATCTCAGTTCGGTGTAGGTCGTTCGCTCCAAGCTGGGCTGTGTGCACGAACCCCCCGTTCAGCCCGACCGCTGCGCCTTATCCGGTAACTATCGTCTTGAGTCCAACCCGGTAAGACACGACTTATCGCCACTGGCAGCAGCCACTGGTAACAGGATTAGCAGAGCGAGGTATGTAGGCGGTGCTACAGAGTTCTTGAAGTGGTGGCCTAACTACGGCTACACTAGAAGAACAGTATTTGGTATCTGCGCTCTGCTGAAGCCAGTTACCTTCGGAAAAAGAGTTGGTAGCTCTTGATCCGGCAAACAAACCACCGCTGGTAGCGGTGGTTTTTTTGTTTGCAAGCAGCAGATTACGCGCAGAAAAAAAGGATCTCAAGAAGATCCTTTGATCTTTTCTACTACCAATGCTTAATCAGTGAGGCACCTATCTCAGCGATCTGTCTATTTCGTTCATCCATAGTTGCCTGACTCCCCGTCGTGTAGATAACTACGATACGGGAGGGCTTACCATCTGGCCCCAGTGCTGCAATGATACCGCGAGACCCACGCTCACCGGCTCCAGATTTATCAGCAATAAACCAGCCAGCCGGAAGGGCCGAGCGCAGAAGTGGTCCTGCAACTTTATCCGCCTCCATCCAGTCTATTAATTGTTGCCGGGAAGCTAGAGTAAGTAGTTCGCCAGTTAATAGTTTGCGCAACGTTGTTGCCATTGCTACAGGCATCGTGGTGTCACGCTCGTCGTTTGGTATGGCTTCATTCAGCTCCGGTTCCCAACGATCAAGGCGAGTTACATGATCCCCCATGTTGTGCAAAAAAGCGGTTAGCTCCTTCGGTCCTCCGATCGTTGTCAGAAGTAAGTTGGCCGCAGTGTTATCACTCATGGTTATGGCAGCACTGCATAATTCTCCTACTGTCATGCCATCCGTAAGATGCTTTTCTGTGACTGGTGAGTACTCAACCAAGTCATTCTGAGAATAGTGTATGCGGCGACCGAGTTGCTCTTGCCCGGCGTCAATACGGGATAATACCGCGCCACATAGCAGAACTTTAAAAGTGCTCATCATTGGAAAACGTTCTTCGGGGCGAAAACTCTCAAGGATCTTACCGCTGTTGAGATCCAGTTCGATGTAACCCACTCGTGCACCCAACTGATCTTCAGCATCTTTTACTTTCACCAGCGTTTCTGGGTGAGCAAAAACAGGAAGGCAAAATGCCGCAAAAAAGGGAATAAGGGCGACACGGAAATGTTGAATACTCATACTCTTCCTTTTTCAATATTATTGAAGCATTTATCAGGGTTATTGTCTCATGAGCGGATACATA
 
 
 ### Toggle format
@@ -175,6 +197,3 @@ Designs primers for one or more template sequences. Three sequences are returned
 ### Format primer list in TAB format
 
 
-"""
-
-st.write(text)
