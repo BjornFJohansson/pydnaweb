@@ -7,4 +7,4 @@ eval "$(pyenv init --path)"
 eval "$(pyenv virtualenv-init -)"
 
 # Run the app using poetry
-exec ~/.local/bin/poetry run streamlit run pydnaweb.py
+exec poetry run streamlit run pydnaweb.py

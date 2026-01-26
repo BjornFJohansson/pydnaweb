@@ -12,12 +12,12 @@ enzymes: {{enzymestring}}
 ---
 # cut
 
-{{target.format("fasta-2line")}}
+{{target.format("fasta-2line dscode")}}
 {% for fragment in fragments %}
 {{fragment.seq.__repr__()}}
 {% endfor %}
 {% for fragment in fragments %}
-{{fragment.format("fasta-2line")}}
+{{fragment.format("fasta-2line dscode")}}
 {% endfor %}
 
 """
